@@ -1,44 +1,56 @@
-# [Project name]
+# Helix Protocol
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A next-generation Web3 financial infrastructure landing site and live dashboard — showcasing real-time cross-chain transaction routing, network health, and protocol statistics.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/api-server run dev` — run the API server (port 8080)
+- `pnpm --filter @workspace/helix-app run dev` — run the frontend (port from env)
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
+- Frontend: React + Vite, TailwindCSS, Wouter routing, Framer Motion
+- API: Express 5 (no database — all data is generated in-memory)
+- Validation: Zod (`zod/v4`)
 - API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `lib/api-spec/openapi.yaml` — OpenAPI spec (source of truth for API contracts)
+- `lib/api-client-react/src/generated/` — generated React Query hooks
+- `lib/api-zod/src/generated/` — generated Zod schemas
+- `artifacts/helix-app/src/pages/` — LandingPage, Dashboard, Transactions, Nodes
+- `artifacts/helix-app/src/components/layout/` — PublicLayout, AppLayout
+- `artifacts/api-server/src/routes/` — stats, transactions, nodes, activity
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- No database: all API data is generated in-memory (realistic seed data) — suitable for a protocol demo/marketing site
+- Dark-only theme: CSS variables set once in `:root, .dark` — no light/dark toggle needed
+- OpenAPI-first: all routes typed from the spec via Orval codegen
+- Layouts split into PublicLayout (landing site) and AppLayout (dashboard sidebar)
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- `/` — Marketing landing page: hero, live network stats, protocol features, blockchain partners, CTA
+- `/app` — Dashboard: total volume, transaction count, avg settlement, success rate, activity feed, system status
+- `/app/transactions` — Full transaction table with status, trust scores, chain info
+- `/app/nodes` — Global node network grid with health, load, region
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Use the provided logo assets from `attached_assets/` directory via `@assets` alias
+- Dark electric theme: deep navy bg, electric cyan/blue accents
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- After OpenAPI spec changes, always run `pnpm --filter @workspace/api-spec run codegen` before touching frontend
+- The `@assets` alias in Vite points to `attached_assets/` at the workspace root
+- No DATABASE_URL needed — backend routes return in-memory data
 
 ## Pointers
 

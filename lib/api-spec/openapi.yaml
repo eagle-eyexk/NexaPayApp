@@ -1,22 +1,29 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Helix Protocol API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: stats
+    description: Network statistics
+  - name: transactions
+    description: Transaction operations
+  - name: nodes
+    description: Network node operations
+  - name: activity
+    description: Activity feed
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +31,130 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /stats/network:
+    get:
+      operationId: getNetworkStats
+      tags: [stats]
+      summary: Get network-wide statistics
+      responses:
+        "200":
+          description: Network stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NetworkStats"
+
+  /stats/chains:
+    get:
+      operationId: getChainStats
+      tags: [stats]
+      summary: Get per-chain statistics
+      responses:
+        "200":
+          description: Chain stats list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChainStat"
+
+  /transactions:
+    get:
+      operationId: listTransactions
+      tags: [transactions]
+      summary: List recent transactions
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Transaction list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transaction"
+
+  /transactions/{id}:
+    get:
+      operationId: getTransaction
+      tags: [transactions]
+      summary: Get a transaction by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Transaction
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+        "404":
+          description: Not found
+
+  /transactions/summary:
+    get:
+      operationId: getTransactionSummary
+      tags: [transactions]
+      summary: Get transaction summary stats (counts, volume by status)
+      responses:
+        "200":
+          description: Transaction summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionSummary"
+
+  /nodes:
+    get:
+      operationId: listNodes
+      tags: [nodes]
+      summary: List network nodes
+      responses:
+        "200":
+          description: Node list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NetworkNode"
+
+  /activity/feed:
+    get:
+      operationId: getActivityFeed
+      tags: [activity]
+      summary: Get recent protocol activity events
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Activity events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityEvent"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +165,176 @@ components:
       required:
         - status
 
+    NetworkStats:
+      type: object
+      properties:
+        totalTransactions:
+          type: number
+        totalVolume:
+          type: number
+        activeWallets:
+          type: number
+        networkUptime:
+          type: number
+        countriesCount:
+          type: integer
+        avgSettlementMs:
+          type: number
+        fraudPreventionRate:
+          type: number
+        crossChainTransfers:
+          type: integer
+      required:
+        - totalTransactions
+        - totalVolume
+        - activeWallets
+        - networkUptime
+        - countriesCount
+        - avgSettlementMs
+        - fraudPreventionRate
+        - crossChainTransfers
+
+    ChainStat:
+      type: object
+      properties:
+        chain:
+          type: string
+        symbol:
+          type: string
+        volume:
+          type: number
+        transactions:
+          type: integer
+        color:
+          type: string
+      required:
+        - chain
+        - symbol
+        - volume
+        - transactions
+        - color
+
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: string
+        timestamp:
+          type: string
+        sourceAddress:
+          type: string
+        destinationAddress:
+          type: string
+        amount:
+          type: number
+        currency:
+          type: string
+        chain:
+          type: string
+        status:
+          type: string
+        trustScore:
+          type: number
+        fraudProbability:
+          type: number
+        estimatedFee:
+          type: number
+        latencyMs:
+          type: integer
+        route:
+          type: array
+          items:
+            type: string
+      required:
+        - id
+        - timestamp
+        - sourceAddress
+        - destinationAddress
+        - amount
+        - currency
+        - chain
+        - status
+        - trustScore
+        - fraudProbability
+        - estimatedFee
+        - latencyMs
+        - route
+
+    TransactionSummary:
+      type: object
+      properties:
+        totalCount:
+          type: integer
+        completedCount:
+          type: integer
+        pendingCount:
+          type: integer
+        failedCount:
+          type: integer
+        totalVolume:
+          type: number
+        avgAmount:
+          type: number
+        successRate:
+          type: number
+      required:
+        - totalCount
+        - completedCount
+        - pendingCount
+        - failedCount
+        - totalVolume
+        - avgAmount
+        - successRate
+
+    NetworkNode:
+      type: object
+      properties:
+        id:
+          type: string
+        nodeType:
+          type: string
+        region:
+          type: string
+        capacity:
+          type: number
+        currentLoad:
+          type: number
+        health:
+          type: number
+        status:
+          type: string
+        transactionsHandled:
+          type: integer
+      required:
+        - id
+        - nodeType
+        - region
+        - capacity
+        - currentLoad
+        - health
+        - status
+        - transactionsHandled
+
+    ActivityEvent:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+        severity:
+          type: string
+        txId:
+          type: ["string", "null"]
+        chain:
+          type: ["string", "null"]
+      required:
+        - id
+        - type
+        - message
+        - timestamp
+        - severity
