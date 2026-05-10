@@ -3,10 +3,19 @@
  * Do not edit manually.
  * Api
  * Helix Protocol API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 export interface HealthStatus {
   status: string;
+}
+
+export interface ApiError {
+  error: string;
+}
+
+export interface SuccessResponse {
+  success: boolean;
+  message?: string;
 }
 
 export interface NetworkStats {
@@ -77,6 +86,143 @@ export interface ActivityEvent {
   chain?: string | null;
 }
 
+export type RegisterRequestRole =
+  (typeof RegisterRequestRole)[keyof typeof RegisterRequestRole];
+
+export const RegisterRequestRole = {
+  user: "user",
+  merchant: "merchant",
+} as const;
+
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  fullName: string;
+  role: RegisterRequestRole;
+  businessName?: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  fullName: string;
+  role: string;
+  /** @nullable */
+  businessName?: string | null;
+  createdAt: string;
+}
+
+export interface UserWallet {
+  id: string;
+  currency: string;
+  balance: string;
+  address: string;
+}
+
+export interface SendFundsRequest {
+  recipientAddress: string;
+  amount: number;
+  currency: string;
+  description?: string;
+}
+
+export interface ReceiveInfo {
+  currency: string;
+  address: string;
+  qrData: string;
+}
+
+export interface UserCard {
+  id: string;
+  cardNumberMasked: string;
+  cardholderName: string;
+  expiryMonth: number;
+  expiryYear: number;
+  cvv: string;
+  balance: string;
+  currency: string;
+  status: string;
+}
+
+export interface UserTransaction {
+  id: string;
+  /** @nullable */
+  senderId?: string | null;
+  /** @nullable */
+  recipientId?: string | null;
+  /** @nullable */
+  senderAddress?: string | null;
+  /** @nullable */
+  recipientAddress?: string | null;
+  amount: string;
+  currency: string;
+  type: string;
+  status: string;
+  /** @nullable */
+  description?: string | null;
+  /** @nullable */
+  chain?: string | null;
+  createdAt: string;
+}
+
+export interface MerchantStats {
+  totalRevenue: string;
+  totalTransactions: number;
+  activeLinks: number;
+  avgTransactionValue: string;
+  todayRevenue: string;
+  monthRevenue: string;
+}
+
+export interface PaymentLink {
+  id: string;
+  merchantId: string;
+  amount: string;
+  currency: string;
+  description: string;
+  linkCode: string;
+  status: string;
+  /** @nullable */
+  payerId?: string | null;
+  /** @nullable */
+  paidAt?: string | null;
+  /** @nullable */
+  expiresAt?: string | null;
+  createdAt: string;
+  url: string;
+}
+
+export interface CreatePaymentLinkRequest {
+  amount: number;
+  currency: string;
+  description: string;
+  expiresInHours?: number;
+}
+
+export interface PosChargeRequest {
+  amount: number;
+  currency: string;
+  description: string;
+  customerEmail?: string;
+}
+
+export interface PayLinkRequest {
+  payerEmail: string;
+  payerName: string;
+  currency?: string;
+}
+
+export interface PayLinkResult {
+  transaction: UserTransaction;
+  receiptUrl: string;
+  couponPdfUrl: string;
+}
+
 export type ListTransactionsParams = {
   limit?: number;
   status?: string;
@@ -84,4 +230,19 @@ export type ListTransactionsParams = {
 
 export type GetActivityFeedParams = {
   limit?: number;
+};
+
+export type GetUserTransactionsParams = {
+  limit?: number;
+  type?: string;
+  currency?: string;
+  from?: string;
+  to?: string;
+};
+
+export type GetMerchantTransactionsParams = {
+  limit?: number;
+  from?: string;
+  to?: string;
+  currency?: string;
 };

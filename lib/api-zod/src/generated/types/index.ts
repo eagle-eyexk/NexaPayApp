@@ -3,15 +3,34 @@
  * Do not edit manually.
  * Api
  * Helix Protocol API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 export * from "./activityEvent";
+export * from "./apiError";
+export * from "./authUser";
 export * from "./chainStat";
+export * from "./createPaymentLinkRequest";
 export * from "./getActivityFeedParams";
+export * from "./getMerchantTransactionsParams";
+export * from "./getUserTransactionsParams";
 export * from "./healthStatus";
 export * from "./listTransactionsParams";
+export * from "./loginRequest";
+export * from "./merchantStats";
 export * from "./networkNode";
 export * from "./networkStats";
+export * from "./payLinkRequest";
+export * from "./payLinkResult";
+export * from "./paymentLink";
+export * from "./posChargeRequest";
+export * from "./receiveInfo";
+export * from "./registerRequest";
+export * from "./registerRequestRole";
+export * from "./sendFundsRequest";
+export * from "./successResponse";
 export * from "./transaction";
 export * from "./transactionSummary";
+export * from "./userCard";
+export * from "./userTransaction";
+export * from "./userWallet";

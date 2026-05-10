@@ -1,24 +1,24 @@
 openapi: 3.1.0
 info:
   title: Api
-  version: 0.1.0
+  version: 0.2.0
   description: Helix Protocol API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
   - name: stats
-    description: Network statistics
   - name: transactions
-    description: Transaction operations
   - name: nodes
-    description: Network node operations
   - name: activity
-    description: Activity feed
+  - name: auth
+  - name: user
+  - name: merchant
+  - name: payment
 
 paths:
+  # ── Health ────────────────────────────────────────────────────────────────
   /healthz:
     get:
       operationId: healthCheck
@@ -32,11 +32,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
 
+  # ── Public protocol stats ─────────────────────────────────────────────────
   /stats/network:
     get:
       operationId: getNetworkStats
       tags: [stats]
-      summary: Get network-wide statistics
       responses:
         "200":
           description: Network stats
@@ -49,10 +49,9 @@ paths:
     get:
       operationId: getChainStats
       tags: [stats]
-      summary: Get per-chain statistics
       responses:
         "200":
-          description: Chain stats list
+          description: Chain stats
           content:
             application/json:
               schema:
@@ -64,7 +63,6 @@ paths:
     get:
       operationId: listTransactions
       tags: [transactions]
-      summary: List recent transactions
       parameters:
         - name: limit
           in: query
@@ -85,11 +83,22 @@ paths:
                 items:
                   $ref: "#/components/schemas/Transaction"
 
+  /transactions/summary:
+    get:
+      operationId: getTransactionSummary
+      tags: [transactions]
+      responses:
+        "200":
+          description: Transaction summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionSummary"
+
   /transactions/{id}:
     get:
       operationId: getTransaction
       tags: [transactions]
-      summary: Get a transaction by ID
       parameters:
         - name: id
           in: path
@@ -106,24 +115,10 @@ paths:
         "404":
           description: Not found
 
-  /transactions/summary:
-    get:
-      operationId: getTransactionSummary
-      tags: [transactions]
-      summary: Get transaction summary stats (counts, volume by status)
-      responses:
-        "200":
-          description: Transaction summary
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TransactionSummary"
-
   /nodes:
     get:
       operationId: listNodes
       tags: [nodes]
-      summary: List network nodes
       responses:
         "200":
           description: Node list
@@ -138,7 +133,6 @@ paths:
     get:
       operationId: getActivityFeed
       tags: [activity]
-      summary: Get recent protocol activity events
       parameters:
         - name: limit
           in: query
@@ -155,6 +149,403 @@ paths:
                 items:
                   $ref: "#/components/schemas/ActivityEvent"
 
+  # ── Auth ──────────────────────────────────────────────────────────────────
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: Registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "409":
+          description: Email taken
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  # ── User wallet ───────────────────────────────────────────────────────────
+  /user/wallets:
+    get:
+      operationId: getUserWallets
+      tags: [user]
+      responses:
+        "200":
+          description: User wallets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserWallet"
+        "401":
+          description: Not authenticated
+
+  /user/wallets/send:
+    post:
+      operationId: sendFunds
+      tags: [user]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendFundsRequest"
+      responses:
+        "200":
+          description: Transaction created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserTransaction"
+        "400":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /user/wallets/receive/{currency}:
+    get:
+      operationId: getReceiveInfo
+      tags: [user]
+      parameters:
+        - name: currency
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Receive address info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReceiveInfo"
+
+  # ── User card ─────────────────────────────────────────────────────────────
+  /user/card:
+    get:
+      operationId: getUserCard
+      tags: [user]
+      responses:
+        "200":
+          description: User virtual card
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserCard"
+        "404":
+          description: No card issued
+
+    post:
+      operationId: issueCard
+      tags: [user]
+      responses:
+        "201":
+          description: Card issued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserCard"
+
+  # ── User transactions ─────────────────────────────────────────────────────
+  /user/transactions:
+    get:
+      operationId: getUserTransactions
+      tags: [user]
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: type
+          in: query
+          schema:
+            type: string
+        - name: currency
+          in: query
+          schema:
+            type: string
+        - name: from
+          in: query
+          schema:
+            type: string
+        - name: to
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserTransaction"
+
+  /user/transactions/{id}:
+    get:
+      operationId: getUserTransaction
+      tags: [user]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Transaction
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserTransaction"
+        "404":
+          description: Not found
+
+  # ── Merchant dashboard ────────────────────────────────────────────────────
+  /merchant/stats:
+    get:
+      operationId: getMerchantStats
+      tags: [merchant]
+      responses:
+        "200":
+          description: Merchant dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MerchantStats"
+
+  /merchant/transactions:
+    get:
+      operationId: getMerchantTransactions
+      tags: [merchant]
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: from
+          in: query
+          schema:
+            type: string
+        - name: to
+          in: query
+          schema:
+            type: string
+        - name: currency
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Merchant transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserTransaction"
+
+  # ── Payment links ─────────────────────────────────────────────────────────
+  /merchant/payment-links:
+    get:
+      operationId: listPaymentLinks
+      tags: [merchant]
+      responses:
+        "200":
+          description: Payment links
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PaymentLink"
+
+    post:
+      operationId: createPaymentLink
+      tags: [merchant]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePaymentLinkRequest"
+      responses:
+        "201":
+          description: Payment link created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentLink"
+
+  /merchant/payment-links/{id}:
+    delete:
+      operationId: cancelPaymentLink
+      tags: [merchant]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Cancelled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ── POS ───────────────────────────────────────────────────────────────────
+  /merchant/pos/charge:
+    post:
+      operationId: posCharge
+      tags: [merchant]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PosChargeRequest"
+      responses:
+        "200":
+          description: Charge successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserTransaction"
+        "400":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  # ── Public pay link ───────────────────────────────────────────────────────
+  /pay/{code}:
+    get:
+      operationId: getPaymentLinkByCode
+      tags: [payment]
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Payment link details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentLink"
+        "404":
+          description: Not found
+
+    post:
+      operationId: payLink
+      tags: [payment]
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PayLinkRequest"
+      responses:
+        "200":
+          description: Payment successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PayLinkResult"
+        "400":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
 components:
   schemas:
     HealthStatus:
@@ -162,8 +553,23 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
+
+    ApiError:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required: [success]
 
     NetworkStats:
       type: object
@@ -184,15 +590,7 @@ components:
           type: number
         crossChainTransfers:
           type: integer
-      required:
-        - totalTransactions
-        - totalVolume
-        - activeWallets
-        - networkUptime
-        - countriesCount
-        - avgSettlementMs
-        - fraudPreventionRate
-        - crossChainTransfers
+      required: [totalTransactions, totalVolume, activeWallets, networkUptime, countriesCount, avgSettlementMs, fraudPreventionRate, crossChainTransfers]
 
     ChainStat:
       type: object
@@ -207,12 +605,7 @@ components:
           type: integer
         color:
           type: string
-      required:
-        - chain
-        - symbol
-        - volume
-        - transactions
-        - color
+      required: [chain, symbol, volume, transactions, color]
 
     Transaction:
       type: object
@@ -245,20 +638,7 @@ components:
           type: array
           items:
             type: string
-      required:
-        - id
-        - timestamp
-        - sourceAddress
-        - destinationAddress
-        - amount
-        - currency
-        - chain
-        - status
-        - trustScore
-        - fraudProbability
-        - estimatedFee
-        - latencyMs
-        - route
+      required: [id, timestamp, sourceAddress, destinationAddress, amount, currency, chain, status, trustScore, fraudProbability, estimatedFee, latencyMs, route]
 
     TransactionSummary:
       type: object
@@ -277,14 +657,7 @@ components:
           type: number
         successRate:
           type: number
-      required:
-        - totalCount
-        - completedCount
-        - pendingCount
-        - failedCount
-        - totalVolume
-        - avgAmount
-        - successRate
+      required: [totalCount, completedCount, pendingCount, failedCount, totalVolume, avgAmount, successRate]
 
     NetworkNode:
       type: object
@@ -305,15 +678,7 @@ components:
           type: string
         transactionsHandled:
           type: integer
-      required:
-        - id
-        - nodeType
-        - region
-        - capacity
-        - currentLoad
-        - health
-        - status
-        - transactionsHandled
+      required: [id, nodeType, region, capacity, currentLoad, health, status, transactionsHandled]
 
     ActivityEvent:
       type: object
@@ -332,9 +697,237 @@ components:
           type: ["string", "null"]
         chain:
           type: ["string", "null"]
-      required:
-        - id
-        - type
-        - message
-        - timestamp
-        - severity
+      required: [id, type, message, timestamp, severity]
+
+    # ── Auth ────────────────────────────────────────────────────────────────
+    RegisterRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        fullName:
+          type: string
+        role:
+          type: string
+          enum: [user, merchant]
+        businessName:
+          type: string
+      required: [email, password, fullName, role]
+
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required: [email, password]
+
+    AuthUser:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        fullName:
+          type: string
+        role:
+          type: string
+        businessName:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+      required: [id, email, fullName, role, createdAt]
+
+    # ── Wallet ──────────────────────────────────────────────────────────────
+    UserWallet:
+      type: object
+      properties:
+        id:
+          type: string
+        currency:
+          type: string
+        balance:
+          type: string
+        address:
+          type: string
+      required: [id, currency, balance, address]
+
+    SendFundsRequest:
+      type: object
+      properties:
+        recipientAddress:
+          type: string
+        amount:
+          type: number
+        currency:
+          type: string
+        description:
+          type: string
+      required: [recipientAddress, amount, currency]
+
+    ReceiveInfo:
+      type: object
+      properties:
+        currency:
+          type: string
+        address:
+          type: string
+        qrData:
+          type: string
+      required: [currency, address, qrData]
+
+    # ── Card ────────────────────────────────────────────────────────────────
+    UserCard:
+      type: object
+      properties:
+        id:
+          type: string
+        cardNumberMasked:
+          type: string
+        cardholderName:
+          type: string
+        expiryMonth:
+          type: integer
+        expiryYear:
+          type: integer
+        cvv:
+          type: string
+        balance:
+          type: string
+        currency:
+          type: string
+        status:
+          type: string
+      required: [id, cardNumberMasked, cardholderName, expiryMonth, expiryYear, cvv, balance, currency, status]
+
+    # ── User transactions ───────────────────────────────────────────────────
+    UserTransaction:
+      type: object
+      properties:
+        id:
+          type: string
+        senderId:
+          type: ["string", "null"]
+        recipientId:
+          type: ["string", "null"]
+        senderAddress:
+          type: ["string", "null"]
+        recipientAddress:
+          type: ["string", "null"]
+        amount:
+          type: string
+        currency:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+        description:
+          type: ["string", "null"]
+        chain:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+      required: [id, amount, currency, type, status, createdAt]
+
+    # ── Merchant ────────────────────────────────────────────────────────────
+    MerchantStats:
+      type: object
+      properties:
+        totalRevenue:
+          type: string
+        totalTransactions:
+          type: integer
+        activeLinks:
+          type: integer
+        avgTransactionValue:
+          type: string
+        todayRevenue:
+          type: string
+        monthRevenue:
+          type: string
+      required: [totalRevenue, totalTransactions, activeLinks, avgTransactionValue, todayRevenue, monthRevenue]
+
+    # ── Payment Links ───────────────────────────────────────────────────────
+    PaymentLink:
+      type: object
+      properties:
+        id:
+          type: string
+        merchantId:
+          type: string
+        amount:
+          type: string
+        currency:
+          type: string
+        description:
+          type: string
+        linkCode:
+          type: string
+        status:
+          type: string
+        payerId:
+          type: ["string", "null"]
+        paidAt:
+          type: ["string", "null"]
+        expiresAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        url:
+          type: string
+      required: [id, merchantId, amount, currency, description, linkCode, status, createdAt, url]
+
+    CreatePaymentLinkRequest:
+      type: object
+      properties:
+        amount:
+          type: number
+        currency:
+          type: string
+        description:
+          type: string
+        expiresInHours:
+          type: integer
+      required: [amount, currency, description]
+
+    # ── POS ─────────────────────────────────────────────────────────────────
+    PosChargeRequest:
+      type: object
+      properties:
+        amount:
+          type: number
+        currency:
+          type: string
+        description:
+          type: string
+        customerEmail:
+          type: string
+      required: [amount, currency, description]
+
+    # ── Pay link (public) ───────────────────────────────────────────────────
+    PayLinkRequest:
+      type: object
+      properties:
+        payerEmail:
+          type: string
+        payerName:
+          type: string
+        currency:
+          type: string
+      required: [payerEmail, payerName]
+
+    PayLinkResult:
+      type: object
+      properties:
+        transaction:
+          $ref: "#/components/schemas/UserTransaction"
+        receiptUrl:
+          type: string
+        couponPdfUrl:
+          type: string
+      required: [transaction, receiptUrl, couponPdfUrl]

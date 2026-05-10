@@ -1,56 +1,71 @@
 # Helix Protocol
 
-A next-generation Web3 financial infrastructure landing site and live dashboard — showcasing real-time cross-chain transaction routing, network health, and protocol statistics.
+A full-stack Web3 financial application: light-theme marketing landing page, user wallet dashboard (multi-currency, digital card, send/receive/QR), merchant dashboard (POS terminal, payment links, revenue with CSV export), auth system, and server-side PDF receipt/coupon generation.
 
 ## Run & Operate
 
 - `pnpm --filter @workspace/api-server run dev` — run the API server (port 8080)
 - `pnpm --filter @workspace/helix-app run dev` — run the frontend (port from env)
 - `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
-- Frontend: React + Vite, TailwindCSS, Wouter routing, Framer Motion
-- API: Express 5 (no database — all data is generated in-memory)
-- Validation: Zod (`zod/v4`)
+- Frontend: React + Vite, TailwindCSS, Wouter routing, react-qr-code
+- API: Express 5 + PostgreSQL (drizzle-orm + @workspace/db)
+- Auth: express-session + bcryptjs + connect-pg-simple (PG session store)
+- PDFs: pdf-lib (server-side receipt & coupon generation)
 - API codegen: Orval (from OpenAPI spec)
 
 ## Where things live
 
-- `lib/api-spec/openapi.yaml` — OpenAPI spec (source of truth for API contracts)
+- `lib/api-spec/openapi.yaml` — OpenAPI spec (source of truth for all API contracts)
+- `lib/db/src/schema/index.ts` — Drizzle schema (users, wallets, cards, transactions, payment_links)
 - `lib/api-client-react/src/generated/` — generated React Query hooks
-- `lib/api-zod/src/generated/` — generated Zod schemas
-- `artifacts/helix-app/src/pages/` — LandingPage, Dashboard, Transactions, Nodes
-- `artifacts/helix-app/src/components/layout/` — PublicLayout, AppLayout
-- `artifacts/api-server/src/routes/` — stats, transactions, nodes, activity
+- `artifacts/helix-app/src/pages/` — all frontend pages
+- `artifacts/helix-app/src/contexts/AuthContext.tsx` — auth context (useAuth hook)
+- `artifacts/helix-app/src/components/layout/` — PublicLayout, AppLayout, MerchantLayout
+- `artifacts/api-server/src/routes/` — auth, user, merchant, payment routes
+- `artifacts/api-server/src/lib/pdf.ts` — PDF receipt + coupon generation
+- `artifacts/api-server/src/middlewares/auth.ts` — requireAuth / requireMerchant
 
 ## Architecture decisions
 
-- No database: all API data is generated in-memory (realistic seed data) — suitable for a protocol demo/marketing site
-- Dark-only theme: CSS variables set once in `:root, .dark` — no light/dark toggle needed
+- PostgreSQL for all data (users, wallets, cards, transactions, payment links, sessions)
+- Sessions stored in `user_sessions` PG table via connect-pg-simple
+- Landing page: LIGHT theme (white bg, indigo/blue accents)
+- Dashboards: DARK electric navy + cyan theme
 - OpenAPI-first: all routes typed from the spec via Orval codegen
-- Layouts split into PublicLayout (landing site) and AppLayout (dashboard sidebar)
+- Layouts: PublicLayout (landing), AppLayout (user dashboard), MerchantLayout (merchant)
+- `artifacts/helix-app/src/lib/api.ts` — global fetch override for `credentials: 'include'`
 
-## Product
+## Routes
 
-- `/` — Marketing landing page: hero, live network stats, protocol features, blockchain partners, CTA
-- `/app` — Dashboard: total volume, transaction count, avg settlement, success rate, activity feed, system status
-- `/app/transactions` — Full transaction table with status, trust scores, chain info
-- `/app/nodes` — Global node network grid with health, load, region
+- `/` — Light-theme marketing landing page (hero, live stats, features, partners, CTAs)
+- `/login` — Sign in (dark)
+- `/register` — Create account: Personal or Merchant (dark)
+- `/dashboard` — User wallet: multi-currency balances, digital card, quick actions
+- `/dashboard/send` — Send funds to any address
+- `/dashboard/receive` — Receive / Tap to Pay QR code per currency
+- `/merchant` — Merchant overview: revenue stats, recent payments
+- `/merchant/pos` — POS terminal with numpad
+- `/merchant/links` — Create & manage shareable payment links
+- `/merchant/revenue` — Full transaction history with CSV export
+- `/pay/:code` — Public payment page (no login needed), PDF coupon + receipt on success
 
 ## User preferences
 
 - Use the provided logo assets from `attached_assets/` directory via `@assets` alias
-- Dark electric theme: deep navy bg, electric cyan/blue accents
+- Landing page: LIGHT theme (white bg, indigo/blue text and gradients)
+- Dashboards: DARK electric theme (deep navy bg, electric cyan/blue accents)
 
 ## Gotchas
 
 - After OpenAPI spec changes, always run `pnpm --filter @workspace/api-spec run codegen` before touching frontend
 - The `@assets` alias in Vite points to `attached_assets/` at the workspace root
-- No DATABASE_URL needed — backend routes return in-memory data
+- The `user_sessions` PG table was manually created (connect-pg-simple `createTableIfMissing` doesn't work when bundled — the `table.sql` asset isn't included in the esbuild bundle)
+- Session cookie: `secure: false`, `httpOnly: true` — works behind the Replit reverse proxy
 
 ## Pointers
 

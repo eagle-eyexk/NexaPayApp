@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Api
  * Helix Protocol API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import * as zod from "zod";
 
@@ -14,9 +14,6 @@ export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
 
-/**
- * @summary Get network-wide statistics
- */
 export const GetNetworkStatsResponse = zod.object({
   totalTransactions: zod.number(),
   totalVolume: zod.number(),
@@ -28,9 +25,6 @@ export const GetNetworkStatsResponse = zod.object({
   crossChainTransfers: zod.number(),
 });
 
-/**
- * @summary Get per-chain statistics
- */
 export const GetChainStatsResponseItem = zod.object({
   chain: zod.string(),
   symbol: zod.string(),
@@ -40,9 +34,6 @@ export const GetChainStatsResponseItem = zod.object({
 });
 export const GetChainStatsResponse = zod.array(GetChainStatsResponseItem);
 
-/**
- * @summary List recent transactions
- */
 export const listTransactionsQueryLimitDefault = 20;
 
 export const ListTransactionsQueryParams = zod.object({
@@ -67,9 +58,16 @@ export const ListTransactionsResponseItem = zod.object({
 });
 export const ListTransactionsResponse = zod.array(ListTransactionsResponseItem);
 
-/**
- * @summary Get a transaction by ID
- */
+export const GetTransactionSummaryResponse = zod.object({
+  totalCount: zod.number(),
+  completedCount: zod.number(),
+  pendingCount: zod.number(),
+  failedCount: zod.number(),
+  totalVolume: zod.number(),
+  avgAmount: zod.number(),
+  successRate: zod.number(),
+});
+
 export const GetTransactionParams = zod.object({
   id: zod.coerce.string(),
 });
@@ -90,22 +88,6 @@ export const GetTransactionResponse = zod.object({
   route: zod.array(zod.string()),
 });
 
-/**
- * @summary Get transaction summary stats (counts, volume by status)
- */
-export const GetTransactionSummaryResponse = zod.object({
-  totalCount: zod.number(),
-  completedCount: zod.number(),
-  pendingCount: zod.number(),
-  failedCount: zod.number(),
-  totalVolume: zod.number(),
-  avgAmount: zod.number(),
-  successRate: zod.number(),
-});
-
-/**
- * @summary List network nodes
- */
 export const ListNodesResponseItem = zod.object({
   id: zod.string(),
   nodeType: zod.string(),
@@ -118,9 +100,6 @@ export const ListNodesResponseItem = zod.object({
 });
 export const ListNodesResponse = zod.array(ListNodesResponseItem);
 
-/**
- * @summary Get recent protocol activity events
- */
 export const getActivityFeedQueryLimitDefault = 10;
 
 export const GetActivityFeedQueryParams = zod.object({
@@ -137,3 +116,276 @@ export const GetActivityFeedResponseItem = zod.object({
   chain: zod.string().nullish(),
 });
 export const GetActivityFeedResponse = zod.array(GetActivityFeedResponseItem);
+
+export const RegisterBody = zod.object({
+  email: zod.string(),
+  password: zod.string(),
+  fullName: zod.string(),
+  role: zod.enum(["user", "merchant"]),
+  businessName: zod.string().optional(),
+});
+
+export const LoginBody = zod.object({
+  email: zod.string(),
+  password: zod.string(),
+});
+
+export const LoginResponse = zod.object({
+  id: zod.string(),
+  email: zod.string(),
+  fullName: zod.string(),
+  role: zod.string(),
+  businessName: zod.string().nullish(),
+  createdAt: zod.string(),
+});
+
+export const LogoutResponse = zod.object({
+  success: zod.boolean(),
+  message: zod.string().optional(),
+});
+
+export const GetMeResponse = zod.object({
+  id: zod.string(),
+  email: zod.string(),
+  fullName: zod.string(),
+  role: zod.string(),
+  businessName: zod.string().nullish(),
+  createdAt: zod.string(),
+});
+
+export const GetUserWalletsResponseItem = zod.object({
+  id: zod.string(),
+  currency: zod.string(),
+  balance: zod.string(),
+  address: zod.string(),
+});
+export const GetUserWalletsResponse = zod.array(GetUserWalletsResponseItem);
+
+export const SendFundsBody = zod.object({
+  recipientAddress: zod.string(),
+  amount: zod.number(),
+  currency: zod.string(),
+  description: zod.string().optional(),
+});
+
+export const SendFundsResponse = zod.object({
+  id: zod.string(),
+  senderId: zod.string().nullish(),
+  recipientId: zod.string().nullish(),
+  senderAddress: zod.string().nullish(),
+  recipientAddress: zod.string().nullish(),
+  amount: zod.string(),
+  currency: zod.string(),
+  type: zod.string(),
+  status: zod.string(),
+  description: zod.string().nullish(),
+  chain: zod.string().nullish(),
+  createdAt: zod.string(),
+});
+
+export const GetReceiveInfoParams = zod.object({
+  currency: zod.coerce.string(),
+});
+
+export const GetReceiveInfoResponse = zod.object({
+  currency: zod.string(),
+  address: zod.string(),
+  qrData: zod.string(),
+});
+
+export const GetUserCardResponse = zod.object({
+  id: zod.string(),
+  cardNumberMasked: zod.string(),
+  cardholderName: zod.string(),
+  expiryMonth: zod.number(),
+  expiryYear: zod.number(),
+  cvv: zod.string(),
+  balance: zod.string(),
+  currency: zod.string(),
+  status: zod.string(),
+});
+
+export const getUserTransactionsQueryLimitDefault = 20;
+
+export const GetUserTransactionsQueryParams = zod.object({
+  limit: zod.coerce.number().default(getUserTransactionsQueryLimitDefault),
+  type: zod.coerce.string().optional(),
+  currency: zod.coerce.string().optional(),
+  from: zod.coerce.string().optional(),
+  to: zod.coerce.string().optional(),
+});
+
+export const GetUserTransactionsResponseItem = zod.object({
+  id: zod.string(),
+  senderId: zod.string().nullish(),
+  recipientId: zod.string().nullish(),
+  senderAddress: zod.string().nullish(),
+  recipientAddress: zod.string().nullish(),
+  amount: zod.string(),
+  currency: zod.string(),
+  type: zod.string(),
+  status: zod.string(),
+  description: zod.string().nullish(),
+  chain: zod.string().nullish(),
+  createdAt: zod.string(),
+});
+export const GetUserTransactionsResponse = zod.array(
+  GetUserTransactionsResponseItem,
+);
+
+export const GetUserTransactionParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const GetUserTransactionResponse = zod.object({
+  id: zod.string(),
+  senderId: zod.string().nullish(),
+  recipientId: zod.string().nullish(),
+  senderAddress: zod.string().nullish(),
+  recipientAddress: zod.string().nullish(),
+  amount: zod.string(),
+  currency: zod.string(),
+  type: zod.string(),
+  status: zod.string(),
+  description: zod.string().nullish(),
+  chain: zod.string().nullish(),
+  createdAt: zod.string(),
+});
+
+export const GetMerchantStatsResponse = zod.object({
+  totalRevenue: zod.string(),
+  totalTransactions: zod.number(),
+  activeLinks: zod.number(),
+  avgTransactionValue: zod.string(),
+  todayRevenue: zod.string(),
+  monthRevenue: zod.string(),
+});
+
+export const getMerchantTransactionsQueryLimitDefault = 20;
+
+export const GetMerchantTransactionsQueryParams = zod.object({
+  limit: zod.coerce.number().default(getMerchantTransactionsQueryLimitDefault),
+  from: zod.coerce.string().optional(),
+  to: zod.coerce.string().optional(),
+  currency: zod.coerce.string().optional(),
+});
+
+export const GetMerchantTransactionsResponseItem = zod.object({
+  id: zod.string(),
+  senderId: zod.string().nullish(),
+  recipientId: zod.string().nullish(),
+  senderAddress: zod.string().nullish(),
+  recipientAddress: zod.string().nullish(),
+  amount: zod.string(),
+  currency: zod.string(),
+  type: zod.string(),
+  status: zod.string(),
+  description: zod.string().nullish(),
+  chain: zod.string().nullish(),
+  createdAt: zod.string(),
+});
+export const GetMerchantTransactionsResponse = zod.array(
+  GetMerchantTransactionsResponseItem,
+);
+
+export const ListPaymentLinksResponseItem = zod.object({
+  id: zod.string(),
+  merchantId: zod.string(),
+  amount: zod.string(),
+  currency: zod.string(),
+  description: zod.string(),
+  linkCode: zod.string(),
+  status: zod.string(),
+  payerId: zod.string().nullish(),
+  paidAt: zod.string().nullish(),
+  expiresAt: zod.string().nullish(),
+  createdAt: zod.string(),
+  url: zod.string(),
+});
+export const ListPaymentLinksResponse = zod.array(ListPaymentLinksResponseItem);
+
+export const CreatePaymentLinkBody = zod.object({
+  amount: zod.number(),
+  currency: zod.string(),
+  description: zod.string(),
+  expiresInHours: zod.number().optional(),
+});
+
+export const CancelPaymentLinkParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const CancelPaymentLinkResponse = zod.object({
+  success: zod.boolean(),
+  message: zod.string().optional(),
+});
+
+export const PosChargeBody = zod.object({
+  amount: zod.number(),
+  currency: zod.string(),
+  description: zod.string(),
+  customerEmail: zod.string().optional(),
+});
+
+export const PosChargeResponse = zod.object({
+  id: zod.string(),
+  senderId: zod.string().nullish(),
+  recipientId: zod.string().nullish(),
+  senderAddress: zod.string().nullish(),
+  recipientAddress: zod.string().nullish(),
+  amount: zod.string(),
+  currency: zod.string(),
+  type: zod.string(),
+  status: zod.string(),
+  description: zod.string().nullish(),
+  chain: zod.string().nullish(),
+  createdAt: zod.string(),
+});
+
+export const GetPaymentLinkByCodeParams = zod.object({
+  code: zod.coerce.string(),
+});
+
+export const GetPaymentLinkByCodeResponse = zod.object({
+  id: zod.string(),
+  merchantId: zod.string(),
+  amount: zod.string(),
+  currency: zod.string(),
+  description: zod.string(),
+  linkCode: zod.string(),
+  status: zod.string(),
+  payerId: zod.string().nullish(),
+  paidAt: zod.string().nullish(),
+  expiresAt: zod.string().nullish(),
+  createdAt: zod.string(),
+  url: zod.string(),
+});
+
+export const PayLinkParams = zod.object({
+  code: zod.coerce.string(),
+});
+
+export const PayLinkBody = zod.object({
+  payerEmail: zod.string(),
+  payerName: zod.string(),
+  currency: zod.string().optional(),
+});
+
+export const PayLinkResponse = zod.object({
+  transaction: zod.object({
+    id: zod.string(),
+    senderId: zod.string().nullish(),
+    recipientId: zod.string().nullish(),
+    senderAddress: zod.string().nullish(),
+    recipientAddress: zod.string().nullish(),
+    amount: zod.string(),
+    currency: zod.string(),
+    type: zod.string(),
+    status: zod.string(),
+    description: zod.string().nullish(),
+    chain: zod.string().nullish(),
+    createdAt: zod.string(),
+  }),
+  receiptUrl: zod.string(),
+  couponPdfUrl: zod.string(),
+});
