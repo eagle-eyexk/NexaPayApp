@@ -122,6 +122,25 @@ export interface UserWallet {
   currency: string;
   balance: string;
   address: string;
+  /** @nullable */
+  publicKey?: string | null;
+}
+
+export interface NexaWalletKey {
+  address: string;
+  publicKey: string;
+  privateKey: string;
+  currency: string;
+}
+
+export interface UpdateSettingsRequest {
+  fullName: string;
+  email: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
 }
 
 export interface SendFundsRequest {

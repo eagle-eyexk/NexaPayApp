@@ -158,8 +158,40 @@ export const GetUserWalletsResponseItem = zod.object({
   currency: zod.string(),
   balance: zod.string(),
   address: zod.string(),
+  publicKey: zod.string().nullish(),
 });
 export const GetUserWalletsResponse = zod.array(GetUserWalletsResponseItem);
+
+export const GetNexaWalletKeyResponse = zod.object({
+  address: zod.string(),
+  publicKey: zod.string(),
+  privateKey: zod.string(),
+  currency: zod.string(),
+});
+
+export const UpdateSettingsBody = zod.object({
+  fullName: zod.string(),
+  email: zod.string(),
+});
+
+export const UpdateSettingsResponse = zod.object({
+  id: zod.string(),
+  email: zod.string(),
+  fullName: zod.string(),
+  role: zod.string(),
+  businessName: zod.string().nullish(),
+  createdAt: zod.string(),
+});
+
+export const ChangePasswordBody = zod.object({
+  currentPassword: zod.string(),
+  newPassword: zod.string(),
+});
+
+export const ChangePasswordResponse = zod.object({
+  success: zod.boolean(),
+  message: zod.string().optional(),
+});
 
 export const SendFundsBody = zod.object({
   recipientAddress: zod.string(),

@@ -1,12 +1,46 @@
 import { Router } from "express";
 import { eq, and, or, desc } from "drizzle-orm";
+import bcrypt from "bcryptjs";
 import { db, walletsTable, cardsTable, transactionsTable, usersTable } from "@workspace/db";
 import { requireAuth } from "../middlewares/auth";
+import { generateNexaKeypair } from "./auth";
 
 const router = Router();
 
+async function ensureNexaWallet(userId: string) {
+  const existing = await db
+    .select()
+    .from(walletsTable)
+    .where(and(eq(walletsTable.userId, userId), eq(walletsTable.currency, "NEXA")))
+    .limit(1);
+
+  if (existing.length === 0) {
+    const { privateKey, publicKey, address } = generateNexaKeypair();
+    await db.insert(walletsTable).values({
+      userId,
+      currency: "NEXA",
+      balance: "0",
+      address,
+      publicKey,
+      privateKey,
+    });
+    return;
+  }
+
+  const wallet = existing[0];
+  if (!wallet.privateKey || !wallet.publicKey) {
+    const { privateKey, publicKey, address } = generateNexaKeypair();
+    await db
+      .update(walletsTable)
+      .set({ privateKey, publicKey, address })
+      .where(eq(walletsTable.id, wallet.id));
+  }
+}
+
 // GET /user/wallets
 router.get("/user/wallets", requireAuth, async (req, res) => {
+  await ensureNexaWallet(req.session.userId!);
+
   const wallets = await db
     .select()
     .from(walletsTable)
@@ -17,7 +51,111 @@ router.get("/user/wallets", requireAuth, async (req, res) => {
     currency: w.currency,
     balance: w.balance,
     address: w.address,
+    publicKey: w.publicKey ?? null,
   })));
+});
+
+// GET /user/nexa-wallet/key
+router.get("/user/nexa-wallet/key", requireAuth, async (req, res) => {
+  await ensureNexaWallet(req.session.userId!);
+
+  const [wallet] = await db
+    .select()
+    .from(walletsTable)
+    .where(and(eq(walletsTable.userId, req.session.userId!), eq(walletsTable.currency, "NEXA")))
+    .limit(1);
+
+  if (!wallet || !wallet.privateKey || !wallet.publicKey) {
+    res.status(404).json({ error: "NEXA wallet not found" });
+    return;
+  }
+
+  res.json({
+    address: wallet.address,
+    publicKey: wallet.publicKey,
+    privateKey: wallet.privateKey,
+    currency: "NEXA",
+  });
+});
+
+// PUT /user/settings
+router.put("/user/settings", requireAuth, async (req, res) => {
+  const { fullName, email } = req.body as { fullName: string; email: string };
+
+  if (!fullName || !email) {
+    res.status(400).json({ error: "Full name and email are required" });
+    return;
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    res.status(400).json({ error: "Invalid email address" });
+    return;
+  }
+
+  const existing = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.email, email))
+    .limit(1);
+
+  if (existing.length > 0 && existing[0].id !== req.session.userId) {
+    res.status(400).json({ error: "Email already in use by another account" });
+    return;
+  }
+
+  const [user] = await db
+    .update(usersTable)
+    .set({ fullName, email })
+    .where(eq(usersTable.id, req.session.userId!))
+    .returning();
+
+  req.session.userFullName = user.fullName;
+  req.session.userEmail = user.email;
+
+  res.json({
+    id: user.id,
+    email: user.email,
+    fullName: user.fullName,
+    role: user.role,
+    businessName: user.businessName,
+    createdAt: user.createdAt.toISOString(),
+  });
+});
+
+// POST /user/settings/password
+router.post("/user/settings/password", requireAuth, async (req, res) => {
+  const { currentPassword, newPassword } = req.body as { currentPassword: string; newPassword: string };
+
+  if (!currentPassword || !newPassword) {
+    res.status(400).json({ error: "Both current and new password are required" });
+    return;
+  }
+
+  if (newPassword.length < 8) {
+    res.status(400).json({ error: "New password must be at least 8 characters" });
+    return;
+  }
+
+  const [user] = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.id, req.session.userId!))
+    .limit(1);
+
+  const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+  if (!valid) {
+    res.status(400).json({ error: "Current password is incorrect" });
+    return;
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, 12);
+  await db
+    .update(usersTable)
+    .set({ passwordHash })
+    .where(eq(usersTable.id, req.session.userId!));
+
+  res.json({ success: true, message: "Password updated successfully" });
 });
 
 // POST /user/wallets/send
@@ -50,20 +188,17 @@ router.post("/user/wallets/send", requireAuth, async (req, res) => {
     return;
   }
 
-  // Find recipient by address
   const [recipientWallet] = await db
     .select()
     .from(walletsTable)
     .where(eq(walletsTable.address, recipientAddress))
     .limit(1);
 
-  // Deduct from sender
   await db
     .update(walletsTable)
     .set({ balance: (parseFloat(senderWallet.balance) - amount).toFixed(8) })
     .where(eq(walletsTable.id, senderWallet.id));
 
-  // Credit recipient if internal
   if (recipientWallet) {
     await db
       .update(walletsTable)
@@ -120,7 +255,7 @@ router.get("/user/wallets/receive/:currency", requireAuth, async (req, res) => {
   res.json({
     currency: wallet.currency,
     address: wallet.address,
-    qrData: `helix:${wallet.address}?currency=${currency}`,
+    qrData: `nexa:${wallet.address}?currency=${currency}`,
   });
 });
 
@@ -169,7 +304,6 @@ router.post("/user/card", requireAuth, async (req, res) => {
     .where(eq(usersTable.id, req.session.userId!))
     .limit(1);
 
-  const chars = "0123456789abcdef";
   const segments = Array.from({ length: 4 }, () => Math.floor(1000 + Math.random() * 9000).toString());
   const now = new Date();
 
@@ -183,7 +317,7 @@ router.post("/user/card", requireAuth, async (req, res) => {
       expiryYear: now.getFullYear() + 4,
       cvv: Math.floor(100 + Math.random() * 900).toString(),
       cardholderName: user.fullName.toUpperCase(),
-      balance: "1000",
+      balance: "0",
       currency: "USD",
       status: "active",
     })

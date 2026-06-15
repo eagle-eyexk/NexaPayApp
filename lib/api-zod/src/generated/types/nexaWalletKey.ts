@@ -6,11 +6,9 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export interface UserWallet {
-  id: string;
-  currency: string;
-  balance: string;
+export interface NexaWalletKey {
   address: string;
-  /** @nullable */
-  publicKey?: string | null;
+  publicKey: string;
+  privateKey: string;
+  currency: string;
 }

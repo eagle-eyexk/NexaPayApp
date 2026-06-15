@@ -1,21 +1,28 @@
 import { type ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, ArrowLeftRight, Server, Send, QrCode, ArrowLeft, Building2 } from "lucide-react";
-import { useHealthCheck, getHealthCheckQueryKey } from "@workspace/api-client-react";
+import { LayoutDashboard, Send, QrCode, ArrowLeft, Building2, Wallet, Settings, History, LogOut } from "lucide-react";
+import { useHealthCheck, getHealthCheckQueryKey, useLogout } from "@workspace/api-client-react";
 import { useAuth } from "@/contexts/AuthContext";
 import nexaLogo from "@assets/BF005E4B-DBB8-4941-97BB-BD3D0186FEBA_1781548526676.png";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const { user } = useAuth();
   const { data: health } = useHealthCheck({ query: { queryKey: getHealthCheckQueryKey() } });
+  const logoutMutation = useLogout();
+
+  const handleLogout = () => {
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => setLocation("/login"),
+    });
+  };
 
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/dashboard/nexa", label: "NEXA Wallet", icon: Wallet },
     { href: "/dashboard/send", label: "Send", icon: Send },
-    { href: "/dashboard/receive", label: "Receive / Tap to Pay", icon: QrCode },
-    { href: "/app/transactions", label: "Transactions", icon: ArrowLeftRight },
-    { href: "/app/nodes", label: "Network Nodes", icon: Server },
+    { href: "/dashboard/receive", label: "Receive / QR", icon: QrCode },
+    { href: "/dashboard/settings", label: "Settings", icon: Settings },
   ];
 
   return (
@@ -50,22 +57,28 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           })}
         </nav>
 
-        <div className="p-4 border-t border-border/40">
-          <div className="text-xs text-muted-foreground mb-1">Signed in as</div>
+        <div className="p-4 border-t border-border/40 space-y-2">
+          <div className="text-xs text-muted-foreground">Signed in as</div>
           <div className="font-semibold text-sm text-foreground truncate">{user?.fullName}</div>
           <div className="text-xs text-muted-foreground truncate">{user?.email}</div>
           {user?.role === "merchant" && (
             <Link href="/merchant">
-              <div className="flex items-center gap-1.5 mt-3 text-xs text-primary hover:text-primary/80 cursor-pointer transition-colors">
+              <div className="flex items-center gap-1.5 pt-1 text-xs text-primary hover:text-primary/80 cursor-pointer transition-colors">
                 <Building2 className="h-3 w-3" /> Merchant Dashboard
               </div>
             </Link>
           )}
           <Link href="/">
-            <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground hover:text-primary cursor-pointer transition-colors">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary cursor-pointer transition-colors">
               <ArrowLeft className="h-3 w-3" /> Back to site
             </div>
           </Link>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-red-400 cursor-pointer transition-colors"
+          >
+            <LogOut className="h-3 w-3" /> Sign Out
+          </button>
         </div>
       </aside>
 

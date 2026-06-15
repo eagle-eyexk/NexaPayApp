@@ -251,6 +251,70 @@ paths:
         "401":
           description: Not authenticated
 
+  /user/nexa-wallet/key:
+    get:
+      operationId: getNexaWalletKey
+      tags: [user]
+      responses:
+        "200":
+          description: NEXA wallet private key (sensitive)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NexaWalletKey"
+        "401":
+          description: Not authenticated
+        "404":
+          description: No NEXA wallet
+
+  /user/settings:
+    put:
+      operationId: updateSettings
+      tags: [user]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSettingsRequest"
+      responses:
+        "200":
+          description: Settings updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "400":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /user/settings/password:
+    post:
+      operationId: changePassword
+      tags: [user]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangePasswordRequest"
+      responses:
+        "200":
+          description: Password changed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
   /user/wallets/send:
     post:
       operationId: sendFunds
@@ -754,7 +818,40 @@ components:
           type: string
         address:
           type: string
+        publicKey:
+          type: ["string", "null"]
       required: [id, currency, balance, address]
+
+    NexaWalletKey:
+      type: object
+      properties:
+        address:
+          type: string
+        publicKey:
+          type: string
+        privateKey:
+          type: string
+        currency:
+          type: string
+      required: [address, publicKey, privateKey, currency]
+
+    UpdateSettingsRequest:
+      type: object
+      properties:
+        fullName:
+          type: string
+        email:
+          type: string
+      required: [fullName, email]
+
+    ChangePasswordRequest:
+      type: object
+      properties:
+        currentPassword:
+          type: string
+        newPassword:
+          type: string
+      required: [currentPassword, newPassword]
 
     SendFundsRequest:
       type: object

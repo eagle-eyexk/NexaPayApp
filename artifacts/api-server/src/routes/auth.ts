@@ -1,5 +1,6 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
+import { createECDH, createHash } from "crypto";
 import { eq } from "drizzle-orm";
 import { db, usersTable, walletsTable, cardsTable } from "@workspace/db";
 
@@ -14,6 +15,17 @@ function generateAddress(currency: string): string {
   return addr;
 }
 
+export function generateNexaKeypair(): { privateKey: string; publicKey: string; address: string } {
+  const ecdh = createECDH("secp256k1");
+  ecdh.generateKeys();
+  const privateKey = ecdh.getPrivateKey("hex");
+  const publicKey = ecdh.getPublicKey("hex", "compressed");
+  const pubKeyBytes = ecdh.getPublicKey();
+  const hash = createHash("sha256").update(pubKeyBytes).digest();
+  const address = "nexa1" + hash.slice(0, 20).toString("hex");
+  return { privateKey, publicKey, address };
+}
+
 function generateCardNumber(): { full: string; masked: string } {
   const segments = Array.from({ length: 4 }, () =>
     Math.floor(1000 + Math.random() * 9000).toString()
@@ -24,14 +36,26 @@ function generateCardNumber(): { full: string; masked: string } {
 }
 
 async function createDefaultWalletsAndCard(userId: string, fullName: string) {
-  const currencies = ["USD", "ETH", "SOL", "USDC", "BTC"];
+  const currencies = ["NEXA", "ETH", "SOL", "USDC", "BTC"];
   for (const currency of currencies) {
-    await db.insert(walletsTable).values({
-      userId,
-      currency,
-      balance: "0",
-      address: generateAddress(currency),
-    });
+    if (currency === "NEXA") {
+      const { privateKey, publicKey, address } = generateNexaKeypair();
+      await db.insert(walletsTable).values({
+        userId,
+        currency: "NEXA",
+        balance: "0",
+        address,
+        publicKey,
+        privateKey,
+      });
+    } else {
+      await db.insert(walletsTable).values({
+        userId,
+        currency,
+        balance: "0",
+        address: generateAddress(currency),
+      });
+    }
   }
 
   const { full, masked } = generateCardNumber();
@@ -48,7 +72,7 @@ async function createDefaultWalletsAndCard(userId: string, fullName: string) {
     expiryYear,
     cvv,
     cardholderName: fullName.toUpperCase(),
-    balance: "1000",
+    balance: "0",
     currency: "USD",
     status: "active",
   });

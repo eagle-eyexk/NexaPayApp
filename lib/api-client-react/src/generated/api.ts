@@ -21,6 +21,7 @@ import type {
   ApiError,
   AuthUser,
   ChainStat,
+  ChangePasswordRequest,
   CreatePaymentLinkRequest,
   GetActivityFeedParams,
   GetMerchantTransactionsParams,
@@ -31,6 +32,7 @@ import type {
   MerchantStats,
   NetworkNode,
   NetworkStats,
+  NexaWalletKey,
   PayLinkRequest,
   PayLinkResult,
   PaymentLink,
@@ -41,6 +43,7 @@ import type {
   SuccessResponse,
   Transaction,
   TransactionSummary,
+  UpdateSettingsRequest,
   UserCard,
   UserTransaction,
   UserWallet,
@@ -1009,6 +1012,234 @@ export function useGetUserWallets<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+export const getGetNexaWalletKeyUrl = () => {
+  return `/api/user/nexa-wallet/key`;
+};
+
+export const getNexaWalletKey = async (
+  options?: RequestInit,
+): Promise<NexaWalletKey> => {
+  return customFetch<NexaWalletKey>(getGetNexaWalletKeyUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetNexaWalletKeyQueryKey = () => {
+  return [`/api/user/nexa-wallet/key`] as const;
+};
+
+export const getGetNexaWalletKeyQueryOptions = <
+  TData = Awaited<ReturnType<typeof getNexaWalletKey>>,
+  TError = ErrorType<void>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getNexaWalletKey>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetNexaWalletKeyQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getNexaWalletKey>>
+  > = ({ signal }) => getNexaWalletKey({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getNexaWalletKey>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetNexaWalletKeyQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getNexaWalletKey>>
+>;
+export type GetNexaWalletKeyQueryError = ErrorType<void>;
+
+export function useGetNexaWalletKey<
+  TData = Awaited<ReturnType<typeof getNexaWalletKey>>,
+  TError = ErrorType<void>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getNexaWalletKey>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetNexaWalletKeyQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+export const getUpdateSettingsUrl = () => {
+  return `/api/user/settings`;
+};
+
+export const updateSettings = async (
+  updateSettingsRequest: UpdateSettingsRequest,
+  options?: RequestInit,
+): Promise<AuthUser> => {
+  return customFetch<AuthUser>(getUpdateSettingsUrl(), {
+    ...options,
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateSettingsRequest),
+  });
+};
+
+export const getUpdateSettingsMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateSettings>>,
+    TError,
+    { data: BodyType<UpdateSettingsRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateSettings>>,
+  TError,
+  { data: BodyType<UpdateSettingsRequest> },
+  TContext
+> => {
+  const mutationKey = ["updateSettings"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateSettings>>,
+    { data: BodyType<UpdateSettingsRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return updateSettings(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateSettingsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateSettings>>
+>;
+export type UpdateSettingsMutationBody = BodyType<UpdateSettingsRequest>;
+export type UpdateSettingsMutationError = ErrorType<ApiError>;
+
+export const useUpdateSettings = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateSettings>>,
+    TError,
+    { data: BodyType<UpdateSettingsRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateSettings>>,
+  TError,
+  { data: BodyType<UpdateSettingsRequest> },
+  TContext
+> => {
+  return useMutation(getUpdateSettingsMutationOptions(options));
+};
+
+export const getChangePasswordUrl = () => {
+  return `/api/user/settings/password`;
+};
+
+export const changePassword = async (
+  changePasswordRequest: ChangePasswordRequest,
+  options?: RequestInit,
+): Promise<SuccessResponse> => {
+  return customFetch<SuccessResponse>(getChangePasswordUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(changePasswordRequest),
+  });
+};
+
+export const getChangePasswordMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof changePassword>>,
+    TError,
+    { data: BodyType<ChangePasswordRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof changePassword>>,
+  TError,
+  { data: BodyType<ChangePasswordRequest> },
+  TContext
+> => {
+  const mutationKey = ["changePassword"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof changePassword>>,
+    { data: BodyType<ChangePasswordRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return changePassword(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ChangePasswordMutationResult = NonNullable<
+  Awaited<ReturnType<typeof changePassword>>
+>;
+export type ChangePasswordMutationBody = BodyType<ChangePasswordRequest>;
+export type ChangePasswordMutationError = ErrorType<ApiError>;
+
+export const useChangePassword = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof changePassword>>,
+    TError,
+    { data: BodyType<ChangePasswordRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof changePassword>>,
+  TError,
+  { data: BodyType<ChangePasswordRequest> },
+  TContext
+> => {
+  return useMutation(getChangePasswordMutationOptions(options));
+};
 
 export const getSendFundsUrl = () => {
   return `/api/user/wallets/send`;

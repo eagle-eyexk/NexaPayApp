@@ -11,6 +11,8 @@ import RegisterPage from "@/pages/RegisterPage";
 import UserDashboard from "@/pages/UserDashboard";
 import SendPage from "@/pages/SendPage";
 import ReceivePage from "@/pages/ReceivePage";
+import NexaWalletPage from "@/pages/NexaWalletPage";
+import SettingsPage from "@/pages/SettingsPage";
 import MerchantDashboard from "@/pages/MerchantDashboard";
 import PosPage from "@/pages/PosPage";
 import PaymentLinksPage from "@/pages/PaymentLinksPage";
@@ -35,6 +37,8 @@ function Router() {
       <Route path="/dashboard" component={() => <AppLayout><UserDashboard /></AppLayout>} />
       <Route path="/dashboard/send" component={() => <AppLayout><SendPage /></AppLayout>} />
       <Route path="/dashboard/receive" component={() => <AppLayout><ReceivePage /></AppLayout>} />
+      <Route path="/dashboard/nexa" component={() => <AppLayout><NexaWalletPage /></AppLayout>} />
+      <Route path="/dashboard/settings" component={() => <AppLayout><SettingsPage /></AppLayout>} />
       <Route path="/merchant" component={() => <MerchantLayout><MerchantDashboard /></MerchantLayout>} />
       <Route path="/merchant/pos" component={() => <MerchantLayout><PosPage /></MerchantLayout>} />
       <Route path="/merchant/links" component={() => <MerchantLayout><PaymentLinksPage /></MerchantLayout>} />
