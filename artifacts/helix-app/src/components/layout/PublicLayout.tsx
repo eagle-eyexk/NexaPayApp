@@ -20,10 +20,11 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
             </div>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-slate-500">
+          <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-500">
             <Link href="/"><span className="text-amber-600 font-semibold cursor-pointer hover:text-amber-700 transition-colors">Home</span></Link>
             <Link href="/whitepaper"><span className="hover:text-amber-600 cursor-pointer transition-colors">Whitepaper</span></Link>
-            {["Technology","Ecosystem","Developers","About"].map((item) => (
+            <Link href="/docs"><span className="hover:text-amber-600 cursor-pointer transition-colors">API Docs</span></Link>
+            {["Technology","Ecosystem","About"].map((item) => (
               <span key={item} className="hover:text-amber-600 cursor-pointer transition-colors">{item}</span>
             ))}
           </nav>
@@ -74,10 +75,9 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
           <div>
             <h4 className="font-bold text-white/80 mb-4 text-xs uppercase tracking-widest">Research</h4>
             <ul className="space-y-2.5">
-              <li>
-                <Link href="/whitepaper"><span className="text-slate-400 hover:text-amber-400 text-sm cursor-pointer transition-colors">Whitepaper</span></Link>
-              </li>
-              {["Technical Docs","Tokenomics","Roadmap"].map((l) => (
+              <li><Link href="/whitepaper"><span className="text-slate-400 hover:text-amber-400 text-sm cursor-pointer transition-colors">Whitepaper</span></Link></li>
+              <li><Link href="/docs"><span className="text-slate-400 hover:text-amber-400 text-sm cursor-pointer transition-colors">API Reference</span></Link></li>
+              {["Tokenomics","Roadmap"].map((l) => (
                 <li key={l} className="text-slate-400 hover:text-amber-400 text-sm cursor-pointer transition-colors">{l}</li>
               ))}
             </ul>

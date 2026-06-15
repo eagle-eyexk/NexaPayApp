@@ -1,10 +1,48 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useLocation } from "wouter";
 import { useUpdateSettings, useChangePassword } from "@workspace/api-client-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { User, Lock, Shield, Bell, Wallet, ChevronRight, Save, Eye, EyeOff, CheckCircle2, AlertTriangle, LogOut, Send, QrCode, History, Settings } from "lucide-react";
+import { User, Lock, Shield, Bell, Wallet, ChevronRight, Save, Eye, EyeOff, CheckCircle2, AlertTriangle, Send, QrCode, History, Settings, BellRing, BellOff, Loader2 } from "lucide-react";
 import { Link } from "wouter";
 import nexaLogo from "@assets/BF005E4B-DBB8-4941-97BB-BD3D0186FEBA_1781548526676.png";
+
+const NOTIF_ITEMS = [
+  { label: "Transaction Received", desc: "Alert when NEXA or any asset arrives", def: true },
+  { label: "Transaction Sent", desc: "Confirmation after you send funds", def: true },
+  { label: "Payment Link Paid", desc: "When a buyer completes your payment link", def: true },
+  { label: "Security Alerts", desc: "New device sign-in or suspicious activity", def: true },
+  { label: "Network Updates", desc: "NEXA protocol upgrades and validator news", def: false },
+  { label: "Marketing", desc: "New features and ecosystem announcements", def: false },
+];
+
+function NotifToggle({ label, desc, defaultOn }: { label: string; desc: string; defaultOn: boolean }) {
+  const [on, setOn] = useState(defaultOn);
+  return (
+    <div className="flex items-center justify-between py-3 border-b border-border/20 last:border-0">
+      <div>
+        <div className="font-medium text-sm">{label}</div>
+        <div className="text-xs text-muted-foreground">{desc}</div>
+      </div>
+      <button
+        onClick={() => setOn(!on)}
+        className={`w-11 h-6 rounded-full border transition-all ${on ? "bg-amber-500/20 border-amber-500/40" : "bg-muted border-border/40"}`}
+      >
+        <div className={`w-4 h-4 rounded-full mt-1 transition-all mx-0.5 ${on ? "bg-amber-400 translate-x-5" : "bg-muted-foreground translate-x-0"}`} />
+      </button>
+    </div>
+  );
+}
+
+function NotifPrefs() {
+  return (
+    <div className="bg-card border border-border/40 rounded-2xl p-5 space-y-1">
+      <h3 className="font-bold text-sm mb-4">Notification Types</h3>
+      {NOTIF_ITEMS.map((item) => (
+        <NotifToggle key={item.label} label={item.label} desc={item.desc} defaultOn={item.def} />
+      ))}
+    </div>
+  );
+}
 
 export default function SettingsPage() {
   const [, setLocation] = useLocation();
@@ -25,8 +63,69 @@ export default function SettingsPage() {
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [passwordError, setPasswordError] = useState("");
 
+  const [notifPermission, setNotifPermission] = useState<NotificationPermission>(
+    typeof Notification !== "undefined" ? Notification.permission : "default"
+  );
+  const [notifLoading, setNotifLoading] = useState(false);
+  const [notifStatus, setNotifStatus] = useState<"idle" | "subscribed" | "error">("idle");
+  const [notifError, setNotifError] = useState("");
+  const [testSent, setTestSent] = useState(false);
+
   const updateMutation = useUpdateSettings();
   const passwordMutation = useChangePassword();
+
+  const enableNotifications = useCallback(async () => {
+    setNotifLoading(true);
+    setNotifError("");
+    try {
+      const perm = await Notification.requestPermission();
+      setNotifPermission(perm);
+      if (perm !== "granted") {
+        setNotifError("Permission denied. Enable notifications in your browser settings.");
+        setNotifLoading(false);
+        return;
+      }
+
+      const swReg = await navigator.serviceWorker.ready;
+
+      // Get VAPID public key
+      const keyRes = await fetch("/api/notifications/vapid-public-key");
+      const { publicKey } = await keyRes.json() as { publicKey: string };
+
+      // Convert base64 to Uint8Array
+      const urlB64 = publicKey.replace(/-/g, "+").replace(/_/g, "/");
+      const raw = atob(urlB64);
+      const key = new Uint8Array(raw.length);
+      for (let i = 0; i < raw.length; ++i) key[i] = raw.charCodeAt(i);
+
+      const subscription = await swReg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: key,
+      });
+
+      await fetch("/api/notifications/subscribe", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(subscription.toJSON()),
+      });
+
+      setNotifStatus("subscribed");
+    } catch (err) {
+      setNotifError(err instanceof Error ? err.message : "Failed to enable notifications");
+    } finally {
+      setNotifLoading(false);
+    }
+  }, []);
+
+  const sendTestNotification = useCallback(async () => {
+    setTestSent(false);
+    try {
+      await fetch("/api/notifications/test", { method: "POST", credentials: "include" });
+      setTestSent(true);
+      setTimeout(() => setTestSent(false), 3000);
+    } catch (_) {}
+  }, []);
 
   if (!user && !isLoading) { setLocation("/login"); return null; }
   if (!user) return null;
@@ -273,28 +372,85 @@ export default function SettingsPage() {
 
       {/* Notifications Tab */}
       {activeTab === "notifications" && (
-        <div className="bg-card border border-border/40 rounded-2xl p-5 space-y-4">
-          <h3 className="font-bold text-base">Notification Preferences</h3>
-          <p className="text-sm text-muted-foreground">Manage how Nexa notifies you about activity.</p>
-          {[
-            { label: "Transaction Received", desc: "Get notified when funds arrive", enabled: true },
-            { label: "Transaction Sent", desc: "Confirmation when you send funds", enabled: true },
-            { label: "Payment Link Paid", desc: "When a merchant payment link is used", enabled: true },
-            { label: "Security Alerts", desc: "New sign-in or suspicious activity", enabled: true },
-            { label: "Network Updates", desc: "NEXA protocol and node updates", enabled: false },
-            { label: "Marketing", desc: "New features and announcements", enabled: false },
-          ].map((item) => (
-            <div key={item.label} className="flex items-center justify-between py-3 border-b border-border/20 last:border-0">
-              <div>
-                <div className="font-medium text-sm">{item.label}</div>
-                <div className="text-xs text-muted-foreground">{item.desc}</div>
+        <div className="space-y-4">
+
+          {/* Push notifications card */}
+          <div className="bg-card border border-border/40 rounded-2xl p-5 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="relative w-10 h-10">
+                <div className="absolute inset-0 bg-amber-400/20 rounded-xl blur-sm" />
+                <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-amber-900/80 to-amber-800/40 border border-amber-400/30 flex items-center justify-center">
+                  <img src={nexaLogo} alt="NEXA" className="w-6 h-6 object-contain" />
+                </div>
               </div>
-              <div className={`w-10 h-6 rounded-full border transition-colors cursor-pointer ${item.enabled ? "bg-amber-500/20 border-amber-500/40" : "bg-muted border-border/40"}`}>
-                <div className={`w-4 h-4 rounded-full mt-1 transition-all ${item.enabled ? "bg-amber-400 translate-x-5" : "bg-muted-foreground translate-x-1"}`} />
+              <div>
+                <h3 className="font-bold text-sm">NEXA Push Notifications</h3>
+                <p className="text-xs text-muted-foreground">Real-time alerts on your device with the NEXA logo</p>
               </div>
             </div>
-          ))}
-          <p className="text-xs text-muted-foreground">Notification delivery coming soon — these are your preferences for when push notifications are enabled.</p>
+
+            {notifPermission === "denied" && (
+              <div className="flex items-start gap-2 p-3 rounded-xl bg-red-500/5 border border-red-500/20">
+                <BellOff className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
+                <div>
+                  <div className="text-sm font-semibold text-red-400">Notifications blocked</div>
+                  <div className="text-xs text-red-400/70 mt-0.5">Open your browser settings → Site permissions → Allow notifications for this site</div>
+                </div>
+              </div>
+            )}
+
+            {notifError && (
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-red-500/5 border border-red-500/20">
+                <AlertTriangle className="h-4 w-4 text-red-400 shrink-0" />
+                <span className="text-sm text-red-400">{notifError}</span>
+              </div>
+            )}
+
+            {notifStatus === "subscribed" && (
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+                <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                <span className="text-sm text-emerald-400">Device registered — NEXA notifications are active</span>
+              </div>
+            )}
+
+            {testSent && (
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-amber-500/5 border border-amber-500/20">
+                <BellRing className="h-4 w-4 text-amber-400 shrink-0" />
+                <span className="text-sm text-amber-400">Test notification sent — check your device</span>
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              {notifPermission !== "granted" || notifStatus !== "subscribed" ? (
+                <button
+                  onClick={enableNotifications}
+                  disabled={notifLoading || notifPermission === "denied"}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-primary hover:bg-primary/90 text-black font-bold text-sm transition-all disabled:opacity-50 shadow-lg shadow-primary/20"
+                >
+                  {notifLoading ? (
+                    <><Loader2 className="h-4 w-4 animate-spin" /> Enabling…</>
+                  ) : (
+                    <><Bell className="h-4 w-4" /> Enable Push Notifications</>
+                  )}
+                </button>
+              ) : (
+                <button
+                  onClick={sendTestNotification}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-amber-500/10 border border-amber-500/30 hover:border-amber-500/50 text-amber-400 font-bold text-sm transition-all"
+                >
+                  <BellRing className="h-4 w-4" /> Send Test Notification
+                </button>
+              )}
+            </div>
+
+            <div className="text-[11px] text-muted-foreground leading-relaxed">
+              Notifications are delivered via the W3C Web Push API. Your browser receives a push token that is stored server-side and used to deliver NEXA-branded alerts directly to your device — even when the app is closed.
+            </div>
+          </div>
+
+          {/* Preferences toggles */}
+          <NotifPrefs />
+
         </div>
       )}
 

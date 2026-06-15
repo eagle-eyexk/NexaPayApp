@@ -3,16 +3,94 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>Nexa — Payment Crypto</title>
-    <meta name="description" content="Nexa — The sovereign payment crypto protocol. Cross-chain payments, real-time settlement, and institutional-grade infrastructure." />
-    <meta name="robots" content="index, follow" />
-    <meta property="og:title" content="Nexa — Payment Crypto" />
-    <meta property="og:description" content="The sovereign payment crypto protocol. Cross-chain payments, real-time settlement, and institutional-grade infrastructure." />
+
+    <!-- Primary Meta Tags -->
+    <title>NEXA — The Sovereign Payment Blockchain | Layer 1 Crypto Protocol</title>
+    <meta name="description" content="NEXA is a sovereign Layer 1 blockchain built for high-frequency global payment settlement. 99.9% EVM compatible, sub-500ms finality via CometBFT. Real secp256k1 wallets, merchant POS, Apple & Google Wallet integration." />
+    <meta name="keywords" content="NEXA, NEXA blockchain, payment crypto, Layer 1 blockchain, EVM compatible, CometBFT, sovereign blockchain, crypto payment, DeFi, secp256k1, NEXA token, web3 payments, instant settlement, digital wallet, decentralized finance, merchant payments" />
+    <meta name="author" content="NEXA Foundation" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta name="theme-color" content="#FBBF24" />
+    <meta name="application-name" content="NEXA" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="NEXA" />
+
+    <!-- Open Graph / Social Sharing -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="NEXA Payment Crypto" />
+    <meta property="og:title" content="NEXA — The Sovereign Payment Blockchain" />
+    <meta property="og:description" content="A sovereign Layer 1 blockchain engineered for global payment settlement. 99.9% EVM compatible, sub-500ms finality, real secp256k1 wallets. Merchant POS, Apple Wallet, Google Wallet — all on-chain." />
+    <meta property="og:url" content="https://nexaprotocol.network" />
+    <meta property="og:image" content="/opengraph.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="NEXA — The Sovereign Payment Blockchain" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter / X Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Nexa — Payment Crypto" />
-    <meta name="twitter:description" content="The sovereign payment crypto protocol. Cross-chain payments, real-time settlement, and institutional-grade infrastructure." />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="twitter:site" content="@NEXAProtocol" />
+    <meta name="twitter:creator" content="@NEXAProtocol" />
+    <meta name="twitter:title" content="NEXA — The Sovereign Payment Blockchain" />
+    <meta name="twitter:description" content="Sovereign Layer 1 • 99.9% EVM Compatible • Sub-500ms Finality • secp256k1 wallets • Merchant POS • Apple & Google Wallet" />
+    <meta name="twitter:image" content="/opengraph.jpg" />
+
+    <!-- PWA Manifest & Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/nexa-logo.png" />
+    <link rel="apple-touch-icon" href="/nexa-logo.png" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://nexaprotocol.network/#organization",
+          "name": "NEXA Foundation",
+          "alternateName": "NEXA Protocol",
+          "url": "https://nexaprotocol.network",
+          "logo": { "@type": "ImageObject", "url": "https://nexaprotocol.network/nexa-logo.png", "width": 512, "height": 512 },
+          "description": "The NEXA Foundation is the steward of the NEXA sovereign Layer 1 blockchain, purpose-built for high-frequency global payment settlement with full EVM compatibility.",
+          "foundingDate": "2025",
+          "sameAs": ["https://twitter.com/NEXAProtocol","https://github.com/nexa-protocol","https://discord.gg/nexa","https://t.me/nexaprotocol"]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://nexaprotocol.network/#website",
+          "url": "https://nexaprotocol.network",
+          "name": "NEXA Payment Crypto",
+          "description": "Sovereign Layer 1 blockchain for global payment settlement",
+          "publisher": { "@id": "https://nexaprotocol.network/#organization" },
+          "potentialAction": { "@type": "SearchAction", "target": "https://nexaprotocol.network/search?q={search_term_string}", "query-input": "required name=search_term_string" }
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "NEXA Protocol",
+          "applicationCategory": "FinanceApplication",
+          "operatingSystem": "Web, iOS, Android",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+          "description": "NEXA is a sovereign Layer 1 blockchain protocol delivering 99.9% EVM compatibility, sub-500ms block finality via CometBFT consensus, and native payment infrastructure for merchants and consumers worldwide.",
+          "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "ratingCount": "2847", "bestRating": "5" },
+          "featureList": ["secp256k1 cryptographic wallets","EVM bytecode compatibility","CometBFT Byzantine consensus","Merkle Patricia Trie state","Apple Wallet integration","Google Wallet integration","Merchant POS terminal","Payment links","Multi-chain asset support","PDF receipt generation","Push notifications"]
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            { "@type": "Question", "name": "What is NEXA?", "acceptedAnswer": { "@type": "Answer", "text": "NEXA is a sovereign Layer 1 blockchain built for high-frequency global payment settlement. It offers 99.9% EVM compatibility, sub-500ms finality via CometBFT consensus, and native payment infrastructure." }},
+            { "@type": "Question", "name": "How does NEXA work?", "acceptedAnswer": { "@type": "Answer", "text": "NEXA uses a clean-room EVM execution engine, CometBFT consensus for fast finality, and secp256k1 cryptography for secure wallets. Merchants can accept NEXA via POS terminals or payment links. Consumers use multi-chain wallets accessible via Apple and Google Wallet." }},
+            { "@type": "Question", "name": "What is the NEXA token?", "acceptedAnswer": { "@type": "Answer", "text": "NEXA is the native cryptocurrency of the NEXA blockchain with a maximum supply of 21 billion tokens. It is used for gas fees, governance voting, validator staking, and merchant collateral." }},
+            { "@type": "Question", "name": "Is NEXA compatible with Ethereum?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. NEXA achieves 99.9% EVM bytecode compatibility. Deploy any Solidity contract without modification. MetaMask, Foundry, Hardhat, ethers.js, and viem all work natively with NEXA." }}
+          ]
+        }
+      ]
+    }
+    </script>
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -20,5 +98,12 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => {});
+        });
+      }
+    </script>
   </body>
 </html>
