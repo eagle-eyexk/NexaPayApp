@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { eq, and, or, desc } from "drizzle-orm";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
+import AdmZip from "adm-zip";
 import { db, walletsTable, cardsTable, transactionsTable, usersTable } from "@workspace/db";
 import { requireAuth } from "../middlewares/auth";
 import { generateNexaKeypair } from "./auth";
@@ -399,6 +401,121 @@ router.get("/user/transactions/:id", requireAuth, async (req, res) => {
     description: tx.description,
     chain: tx.chain,
     createdAt: tx.createdAt.toISOString(),
+  });
+});
+
+// ─── Apple Wallet Pass ──────────────────────────────────────────────────────
+router.get("/user/wallet/apple-pass", requireAuth, async (req, res) => {
+  const userId = req.session.userId!;
+  const nexaWallet = await db.query.walletsTable.findFirst({
+    where: and(eq(walletsTable.userId, userId), eq(walletsTable.currency, "NEXA")),
+  });
+  if (!nexaWallet) { res.status(404).json({ error: "NEXA wallet not found" }); return; }
+
+  const balance = parseFloat(nexaWallet.balance ?? "0");
+  const address = nexaWallet.address;
+  const shortAddr = address.slice(0, 10) + "…" + address.slice(-8);
+
+  const passJson = JSON.stringify({
+    formatVersion: 1,
+    passTypeIdentifier: "pass.network.nexa.wallet",
+    serialNumber: address,
+    teamIdentifier: "NEXATEAMID1",
+    organizationName: "NEXA Core Network",
+    description: "NEXA Layer 1 Sovereign Balance Pass",
+    logoText: "NEXA",
+    foregroundColor: "rgb(255, 255, 255)",
+    backgroundColor: "rgb(9, 9, 11)",
+    labelColor: "rgb(251, 191, 36)",
+    generic: {
+      primaryFields: [
+        { key: "balance", label: "NEXA BALANCE", value: `${balance.toFixed(4)} NEXA` },
+      ],
+      secondaryFields: [
+        { key: "address", label: "WALLET ADDRESS", value: shortAddr },
+        { key: "network", label: "NETWORK", value: "NEXA Layer 1" },
+      ],
+      auxiliaryFields: [
+        { key: "algo", label: "ALGORITHM", value: "secp256k1" },
+        { key: "chain", label: "CHAIN ID", value: "9999" },
+      ],
+    },
+    barcode: {
+      format: "PKBarcodeFormatQR",
+      message: address,
+      messageEncoding: "iso-8859-1",
+      altText: shortAddr,
+    },
+  }, null, 2);
+
+  // Build manifest (SHA1 hashes of each file)
+  const passHash = crypto.createHash("sha1").update(passJson).digest("hex");
+  const manifestJson = JSON.stringify({ "pass.json": passHash });
+  const manifestHash = crypto.createHash("sha1").update(manifestJson).digest("hex");
+
+  // Placeholder signature (production: PKCS7 signed with Apple Developer cert)
+  const signature = Buffer.from(
+    `NEXA-PASS-SIGNATURE:${manifestHash}:${Date.now()}`, "utf8"
+  );
+
+  // Assemble .pkpass zip
+  const zip = new AdmZip();
+  zip.addFile("pass.json", Buffer.from(passJson, "utf8"));
+  zip.addFile("manifest.json", Buffer.from(manifestJson, "utf8"));
+  zip.addFile("signature", signature);
+
+  const pkpassBuffer = zip.toBuffer();
+
+  res.setHeader("Content-Type", "application/vnd.apple.pkpass");
+  res.setHeader("Content-Disposition", `attachment; filename="nexa-${address.slice(0, 12)}.pkpass"`);
+  res.setHeader("Content-Length", pkpassBuffer.length.toString());
+  res.send(pkpassBuffer);
+});
+
+// ─── Google Wallet Pass Link ─────────────────────────────────────────────────
+router.get("/user/wallet/google-pass", requireAuth, async (req, res) => {
+  const userId = req.session.userId!;
+  const nexaWallet = await db.query.walletsTable.findFirst({
+    where: and(eq(walletsTable.userId, userId), eq(walletsTable.currency, "NEXA")),
+  });
+  if (!nexaWallet) { res.status(404).json({ error: "NEXA wallet not found" }); return; }
+
+  const balance = parseFloat(nexaWallet.balance ?? "0");
+  const address = nexaWallet.address;
+
+  // Build the Google Wallet generic object payload
+  const issuerId = "3388000000022795";
+  const objectId = `${issuerId}.nexa_${address.slice(0, 20)}`;
+
+  const payload = {
+    genericObjects: [{
+      id: objectId,
+      classId: `${issuerId}.nexa_balance_card`,
+      genericType: "GENERIC_TYPE_UNSPECIFIED",
+      cardTitle: { defaultValue: { language: "en-US", value: "NEXA Blockchain" } },
+      header: { defaultValue: { language: "en-US", value: `${balance.toFixed(4)} NEXA` } },
+      subheader: { defaultValue: { language: "en-US", value: "NEXA Layer 1 Wallet" } },
+      textModulesData: [
+        { header: "WALLET ADDRESS", body: address, id: "address" },
+        { header: "NETWORK", body: "NEXA Sovereign Layer 1", id: "network" },
+        { header: "ALGORITHM", body: "secp256k1 ECDSA", id: "algo" },
+      ],
+      barcode: { type: "QR_CODE", value: address, alternateText: address.slice(0, 20) + "…" },
+      hexBackgroundColor: "#09090b",
+      logo: { sourceUri: { uri: "https://nexaprotocol.network/logo.png" } },
+    }],
+  };
+
+  // In production, sign with Google service account RS256 JWT.
+  // Here we return the structured payload for display / integration.
+  const encodedPayload = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  const googleWalletUrl = `https://pay.google.com/gp/v/save/${encodedPayload}`;
+
+  res.json({
+    url: googleWalletUrl,
+    objectId,
+    balance: balance.toFixed(4),
+    address,
   });
 });
 

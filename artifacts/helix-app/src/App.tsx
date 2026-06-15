@@ -6,6 +6,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 
 import NotFound from "@/pages/not-found";
 import LandingPage from "@/pages/LandingPage";
+import WhitepaperPage from "@/pages/WhitepaperPage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import UserDashboard from "@/pages/UserDashboard";
@@ -31,6 +32,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={() => <PublicLayout><LandingPage /></PublicLayout>} />
+      <Route path="/whitepaper" component={() => <PublicLayout><WhitepaperPage /></PublicLayout>} />
       <Route path="/login" component={LoginPage} />
       <Route path="/register" component={RegisterPage} />
       <Route path="/pay/:code" component={PayPage} />

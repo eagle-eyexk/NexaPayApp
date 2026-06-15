@@ -3,8 +3,8 @@ import { useLocation } from "wouter";
 import { useGetUserWallets, useGetNexaWalletKey, useGetUserTransactions, getGetUserWalletsQueryKey, getGetNexaWalletKeyQueryKey, getGetUserTransactionsQueryKey } from "@workspace/api-client-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  Copy, Eye, EyeOff, Send, QrCode, Shield, CheckCircle2, XCircle, Clock,
-  ArrowUpRight, ArrowDownLeft, AlertTriangle, Key, Hexagon, Check
+  Copy, Eye, EyeOff, Send, QrCode, Shield, CheckCircle2,
+  ArrowUpRight, ArrowDownLeft, AlertTriangle, Key, Hexagon, Check, Smartphone, ExternalLink
 } from "lucide-react";
 import { Link } from "wouter";
 import nexaLogo from "@assets/BF005E4B-DBB8-4941-97BB-BD3D0186FEBA_1781548526676.png";
@@ -212,6 +212,67 @@ export default function NexaWalletPage() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Mobile Wallet Passes */}
+      <div className="bg-card border border-border/40 rounded-2xl p-5">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+            <Smartphone className="h-4 w-4 text-blue-400" />
+          </div>
+          <div>
+            <div className="font-semibold text-sm">Mobile Wallet Passes</div>
+            <div className="text-xs text-muted-foreground">Add your NEXA balance to Apple or Google Wallet</div>
+          </div>
+        </div>
+
+        <div className="space-y-2.5">
+          {/* Apple Wallet */}
+          <a
+            href="/api/user/wallet/apple-pass"
+            download
+            className="flex items-center justify-between p-3.5 rounded-xl bg-black/40 border border-white/8 hover:border-white/15 hover:bg-black/60 transition-all group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-700 to-slate-900 border border-white/10 flex items-center justify-center text-sm">
+                🍎
+              </div>
+              <div>
+                <div className="font-semibold text-sm text-white">Add to Apple Wallet</div>
+                <div className="text-[10px] text-muted-foreground">Downloads a .pkpass file</div>
+              </div>
+            </div>
+            <ExternalLink className="h-3.5 w-3.5 text-muted-foreground group-hover:text-white transition-colors" />
+          </a>
+
+          {/* Google Wallet */}
+          <button
+            onClick={async () => {
+              const res = await fetch("/api/user/wallet/google-pass", { credentials: "include" });
+              const data = await res.json() as { url: string };
+              if (data.url) window.open(data.url, "_blank");
+            }}
+            className="w-full flex items-center justify-between p-3.5 rounded-xl bg-blue-950/40 border border-blue-500/15 hover:border-blue-500/30 hover:bg-blue-950/60 transition-all group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-700 to-blue-900 border border-blue-500/20 flex items-center justify-center text-sm">
+                G
+              </div>
+              <div className="text-left">
+                <div className="font-semibold text-sm text-white">Add to Google Wallet</div>
+                <div className="text-[10px] text-muted-foreground">Opens Google Pay save flow</div>
+              </div>
+            </div>
+            <ExternalLink className="h-3.5 w-3.5 text-muted-foreground group-hover:text-blue-400 transition-colors" />
+          </button>
+        </div>
+
+        <div className="mt-3 flex items-start gap-2 p-3 rounded-xl bg-blue-500/5 border border-blue-500/15">
+          <Shield className="h-3.5 w-3.5 text-blue-400 mt-0.5 shrink-0" />
+          <p className="text-[10px] text-blue-400/70 leading-relaxed">
+            Passes show your NEXA balance and wallet address. Your private key is never included. Production passes require Apple Developer & Google service account certificates.
+          </p>
+        </div>
       </div>
 
       {/* Wallet Info */}
