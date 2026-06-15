@@ -1,6 +1,6 @@
-# Helix Protocol
+# Nexa — Payment Crypto
 
-A full-stack Web3 financial application: light-theme marketing landing page, user wallet dashboard (multi-currency, digital card, send/receive/QR), merchant dashboard (POS terminal, payment links, revenue with CSV export), auth system, and server-side PDF receipt/coupon generation.
+A full-stack Web3 financial application: dark gold-themed marketing landing page, user wallet dashboard (multi-currency, digital card, send/receive/QR), merchant dashboard (POS terminal, payment links, revenue with CSV export), auth system, and server-side PDF receipt/coupon generation.
 
 ## Run & Operate
 
@@ -12,7 +12,7 @@ A full-stack Web3 financial application: light-theme marketing landing page, use
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
-- Frontend: React + Vite, TailwindCSS, Wouter routing, react-qr-code
+- Frontend: React + Vite, TailwindCSS (Space Grotesk font), Wouter routing, react-qr-code
 - API: Express 5 + PostgreSQL (drizzle-orm + @workspace/db)
 - Auth: express-session + bcryptjs + connect-pg-simple (PG session store)
 - PDFs: pdf-lib (server-side receipt & coupon generation)
@@ -34,17 +34,18 @@ A full-stack Web3 financial application: light-theme marketing landing page, use
 
 - PostgreSQL for all data (users, wallets, cards, transactions, payment links, sessions)
 - Sessions stored in `user_sessions` PG table via connect-pg-simple
-- Landing page: LIGHT theme (white bg, indigo/blue accents)
-- Dashboards: DARK electric navy + cyan theme
+- Brand: NEXA — dark (#07070d) background, amber/gold (#FBBF24) accents throughout
+- Primary CSS color: HSL(43, 96%, 56%) — gold/amber
+- Font: Space Grotesk (headings), Inter (body)
 - OpenAPI-first: all routes typed from the spec via Orval codegen
 - Layouts: PublicLayout (landing), AppLayout (user dashboard), MerchantLayout (merchant)
 - `artifacts/helix-app/src/lib/api.ts` — global fetch override for `credentials: 'include'`
 
 ## Routes
 
-- `/` — Light-theme marketing landing page (hero, live stats, features, partners, CTAs)
-- `/login` — Sign in (dark)
-- `/register` — Create account: Personal or Merchant (dark)
+- `/` — Dark gold marketing landing page (hero with Nexa logo, live stats, features, architecture, CTAs)
+- `/login` — Sign in (dark + gold)
+- `/register` — Create account: Personal or Merchant (dark + gold)
 - `/dashboard` — User wallet: multi-currency balances, digital card, quick actions
 - `/dashboard/send` — Send funds to any address
 - `/dashboard/receive` — Receive / Tap to Pay QR code per currency
@@ -56,9 +57,10 @@ A full-stack Web3 financial application: light-theme marketing landing page, use
 
 ## User preferences
 
-- Use the provided logo assets from `attached_assets/` directory via `@assets` alias
-- Landing page: LIGHT theme (white bg, indigo/blue text and gradients)
-- Dashboards: DARK electric theme (deep navy bg, electric cyan/blue accents)
+- Brand name: NEXA / Nexa Payment Crypto (NOT Helix)
+- Logo: `@assets/BF005E4B-DBB8-4941-97BB-BD3D0186FEBA_1781548526676.png` (gold Nexa N logo)
+- Theme: DARK (#07070d bg) + GOLD (amber-400 #FBBF24) accents everywhere
+- Font: Space Grotesk for headings/branding
 
 ## Gotchas
 

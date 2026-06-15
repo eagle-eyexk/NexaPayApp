@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { LayoutDashboard, ArrowLeftRight, Server, Send, QrCode, ArrowLeft, Building2 } from "lucide-react";
 import { useHealthCheck, getHealthCheckQueryKey } from "@workspace/api-client-react";
 import { useAuth } from "@/contexts/AuthContext";
+import nexaLogo from "@assets/BF005E4B-DBB8-4941-97BB-BD3D0186FEBA_1781548526676.png";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
@@ -20,9 +21,18 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-background text-foreground flex font-sans dark">
       <aside className="w-64 border-r border-border/40 bg-card hidden md:flex flex-col">
-        <div className="h-16 flex items-center px-6 border-b border-border/40">
+        <div className="h-16 flex items-center px-5 border-b border-border/40 gap-3">
           <Link href="/">
-            <div className="font-bold text-lg tracking-wider text-white cursor-pointer">HELIX <span className="text-primary">APP</span></div>
+            <div className="flex items-center gap-2.5 cursor-pointer">
+              <div className="relative w-8 h-8 shrink-0">
+                <div className="absolute inset-0 bg-primary/20 rounded-lg blur-sm" />
+                <img src={nexaLogo} alt="Nexa" className="relative w-8 h-8 object-contain rounded-lg" />
+              </div>
+              <div>
+                <div className="font-black text-sm tracking-widest text-white">NEXA</div>
+                <div className="text-[8px] text-primary/70 font-bold tracking-[0.25em] -mt-0.5">WALLET</div>
+              </div>
+            </div>
           </Link>
         </div>
 
@@ -31,7 +41,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             const isActive = location === item.href;
             return (
               <Link key={item.href} href={item.href}>
-                <div className={`flex items-center gap-3 px-3 py-2.5 rounded-md cursor-pointer transition-colors ${isActive ? "bg-primary/10 text-primary border border-primary/20" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}>
+                <div className={`flex items-center gap-3 px-3 py-2.5 rounded-md cursor-pointer transition-colors ${isActive ? "bg-primary/10 text-primary border border-primary/20 shadow-[0_0_12px_rgba(251,191,36,0.1)]" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}>
                   <item.icon className="h-4 w-4 shrink-0" />
                   <span className="font-medium text-sm">{item.label}</span>
                 </div>
@@ -42,7 +52,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
         <div className="p-4 border-t border-border/40">
           <div className="text-xs text-muted-foreground mb-1">Signed in as</div>
-          <div className="font-medium text-sm text-foreground truncate">{user?.fullName}</div>
+          <div className="font-semibold text-sm text-foreground truncate">{user?.fullName}</div>
           <div className="text-xs text-muted-foreground truncate">{user?.email}</div>
           {user?.role === "merchant" && (
             <Link href="/merchant">

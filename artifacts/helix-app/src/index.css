@@ -49,37 +49,37 @@
 }
 
 :root, .dark {
-  --background: 224 71% 4%;
-  --foreground: 213 31% 91%;
+  --background: 222 47% 5%;
+  --foreground: 40 30% 92%;
   
-  --card: 224 71% 6%;
-  --card-foreground: 213 31% 91%;
-  --card-border: 216 34% 17%;
+  --card: 222 40% 7%;
+  --card-foreground: 40 30% 92%;
+  --card-border: 220 30% 14%;
   
-  --popover: 224 71% 4%;
-  --popover-foreground: 213 31% 91%;
-  --popover-border: 216 34% 17%;
+  --popover: 222 47% 5%;
+  --popover-foreground: 40 30% 92%;
+  --popover-border: 220 30% 14%;
   
-  --primary: 190 90% 50%;
-  --primary-foreground: 224 71% 4%;
+  --primary: 43 96% 56%;
+  --primary-foreground: 20 14% 4%;
   
-  --secondary: 217 91% 60%;
-  --secondary-foreground: 210 40% 98%;
+  --secondary: 38 80% 45%;
+  --secondary-foreground: 20 14% 4%;
   
-  --muted: 216 34% 17%;
-  --muted-foreground: 215 20.2% 65.1%;
+  --muted: 220 30% 14%;
+  --muted-foreground: 215 15% 55%;
   
-  --accent: 216 34% 17%;
-  --accent-foreground: 210 40% 98%;
+  --accent: 220 30% 14%;
+  --accent-foreground: 40 30% 92%;
   
   --destructive: 359 51% 48%;
   --destructive-foreground: 210 40% 98%;
   
-  --border: 216 34% 17%;
-  --input: 216 34% 17%;
-  --ring: 190 90% 50%;
+  --border: 220 30% 14%;
+  --input: 220 30% 14%;
+  --ring: 43 96% 56%;
   
-  --app-font-sans: 'Inter', sans-serif;
+  --app-font-sans: 'Space Grotesk', 'Inter', sans-serif;
   --app-font-mono: 'Space Mono', monospace;
   --radius: 0.5rem;
   
