@@ -24,11 +24,10 @@ export default function PublicLayout({ children, noWrap }: { children: ReactNode
             <Link href="/"><span className="text-amber-600 font-semibold cursor-pointer hover:text-amber-700 transition-colors">Home</span></Link>
             <Link href="/explorer"><span className="hover:text-amber-600 cursor-pointer transition-colors">Explorer</span></Link>
             <Link href="/analytics"><span className="hover:text-amber-600 cursor-pointer transition-colors">Analytics</span></Link>
+            <Link href="/token"><span className="hover:text-amber-600 cursor-pointer transition-colors">Token</span></Link>
+            <Link href="/governance"><span className="hover:text-amber-600 cursor-pointer transition-colors">Governance</span></Link>
             <Link href="/whitepaper"><span className="hover:text-amber-600 cursor-pointer transition-colors">Whitepaper</span></Link>
             <Link href="/docs"><span className="hover:text-amber-600 cursor-pointer transition-colors">API Docs</span></Link>
-            {["Technology", "About"].map((item) => (
-              <span key={item} className="hover:text-amber-600 cursor-pointer transition-colors">{item}</span>
-            ))}
           </nav>
 
           <Link href="/login">

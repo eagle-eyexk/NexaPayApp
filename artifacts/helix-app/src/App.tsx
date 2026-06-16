@@ -10,6 +10,8 @@ import WhitepaperPage from "@/pages/WhitepaperPage";
 import ApiDocsPage from "@/pages/ApiDocsPage";
 import ExplorerPage from "@/pages/ExplorerPage";
 import AnalyticsPage from "@/pages/AnalyticsPage";
+import TokenPage from "@/pages/TokenPage";
+import GovernancePage from "@/pages/GovernancePage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import UserDashboard from "@/pages/UserDashboard";
@@ -39,6 +41,8 @@ function Router() {
       <Route path="/docs" component={() => <PublicLayout><ApiDocsPage /></PublicLayout>} />
       <Route path="/explorer" component={() => <PublicLayout noWrap><ExplorerPage /></PublicLayout>} />
       <Route path="/analytics" component={() => <PublicLayout noWrap><AnalyticsPage /></PublicLayout>} />
+      <Route path="/token" component={() => <PublicLayout noWrap><TokenPage /></PublicLayout>} />
+      <Route path="/governance" component={() => <PublicLayout noWrap><GovernancePage /></PublicLayout>} />
       <Route path="/login" component={LoginPage} />
       <Route path="/register" component={RegisterPage} />
       <Route path="/pay/:code" component={PayPage} />

@@ -11,6 +11,8 @@ import paymentRouter from "./payment";
 import notificationsRouter from "./notifications";
 import explorerRouter from "./explorer";
 import analyticsRouter from "./analytics";
+import tokenRouter from "./token";
+import governanceRouter from "./governance";
 
 const router: IRouter = Router();
 
@@ -26,5 +28,7 @@ router.use(paymentRouter);
 router.use(notificationsRouter);
 router.use(explorerRouter);
 router.use(analyticsRouter);
+router.use(tokenRouter);
+router.use(governanceRouter);
 
 export default router;
