@@ -20,6 +20,7 @@
     "drizzle-orm": "catalog:",
     "express": "^5",
     "express-session": "^1.19.0",
+    "js-sha3": "^0.9.3",
     "jsonwebtoken": "^9.0.3",
     "nanoid": "^5.1.11",
     "pdf-lib": "^1.17.1",

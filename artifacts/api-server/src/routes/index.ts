@@ -9,6 +9,8 @@ import userRouter from "./user";
 import merchantRouter from "./merchant";
 import paymentRouter from "./payment";
 import notificationsRouter from "./notifications";
+import explorerRouter from "./explorer";
+import analyticsRouter from "./analytics";
 
 const router: IRouter = Router();
 
@@ -22,5 +24,7 @@ router.use(userRouter);
 router.use(merchantRouter);
 router.use(paymentRouter);
 router.use(notificationsRouter);
+router.use(explorerRouter);
+router.use(analyticsRouter);
 
 export default router;
