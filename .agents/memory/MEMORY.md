@@ -1,0 +1,3 @@
+- [Nexa coin logos](coin-logos.md) — CoinLogo.tsx has SVG gradient logos + COIN_PRICES + COIN_SPARKLINES; import from @/components/CoinLogo
+- [Recharts available](recharts-available.md) — recharts ^2.15.2 already in helix-app devDependencies; PieChart, BarChart, AreaChart all work
+- [No Math.random in API](api-static-data.md) — all API routes use static deterministic data; no simulation functions; node types match blockchain spec

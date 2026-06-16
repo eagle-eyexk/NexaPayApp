@@ -16,9 +16,9 @@ function timeAgo(d: string) {
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
-    completed: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-    pending: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-    failed: "bg-red-500/10 text-red-400 border-red-500/20",
+    completed: "bg-emerald-500/10 text-emerald-700 border-emerald-500/20",
+    pending: "bg-yellow-500/10 text-yellow-700 border-yellow-500/20",
+    failed: "bg-red-500/10 text-red-600 border-red-500/20",
   };
   return (
     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border capitalize ${map[status] ?? "bg-muted text-muted-foreground border-border/40"}`}>
@@ -45,17 +45,16 @@ export default function MerchantDashboard() {
   if (!user) return null;
 
   const statCards = [
-    { label: "Total Revenue", value: `$${parseFloat(stats?.totalRevenue ?? "0").toLocaleString()}`, icon: DollarSign, color: "text-cyan-400", glow: "shadow-[0_0_20px_rgba(0,255,255,0.1)]" },
-    { label: "Total Transactions", value: stats?.totalTransactions?.toLocaleString() ?? "0", icon: Activity, color: "text-blue-400", glow: "" },
-    { label: "Active Links", value: stats?.activeLinks?.toLocaleString() ?? "0", icon: Link2, color: "text-purple-400", glow: "" },
-    { label: "Avg. Transaction", value: `$${parseFloat(stats?.avgTransactionValue ?? "0").toFixed(2)}`, icon: TrendingUp, color: "text-emerald-400", glow: "" },
-    { label: "Today", value: `$${parseFloat(stats?.todayRevenue ?? "0").toFixed(2)}`, icon: TrendingUp, color: "text-yellow-400", glow: "" },
-    { label: "This Month", value: `$${parseFloat(stats?.monthRevenue ?? "0").toLocaleString()}`, icon: DollarSign, color: "text-orange-400", glow: "" },
+    { label: "Total Revenue", value: `$${parseFloat(stats?.totalRevenue ?? "0").toLocaleString()}`, icon: DollarSign, color: "text-cyan-700", bg: "bg-cyan-50 border-cyan-100" },
+    { label: "Total Transactions", value: stats?.totalTransactions?.toLocaleString() ?? "0", icon: Activity, color: "text-blue-600", bg: "bg-blue-50 border-blue-100" },
+    { label: "Active Links", value: stats?.activeLinks?.toLocaleString() ?? "0", icon: Link2, color: "text-purple-700", bg: "bg-purple-50 border-purple-100" },
+    { label: "Avg. Transaction", value: `$${parseFloat(stats?.avgTransactionValue ?? "0").toFixed(2)}`, icon: TrendingUp, color: "text-emerald-700", bg: "bg-emerald-50 border-emerald-100" },
+    { label: "Today", value: `$${parseFloat(stats?.todayRevenue ?? "0").toFixed(2)}`, icon: TrendingUp, color: "text-yellow-700", bg: "bg-yellow-50 border-yellow-100" },
+    { label: "This Month", value: `$${parseFloat(stats?.monthRevenue ?? "0").toLocaleString()}`, icon: DollarSign, color: "text-orange-600", bg: "bg-orange-50 border-orange-100" },
   ];
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold">{user.businessName ?? user.fullName}</h1>
@@ -71,10 +70,12 @@ export default function MerchantDashboard() {
       {/* Stats grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {statCards.map((card) => (
-          <div key={card.label} className={`bg-card border border-border/40 rounded-xl p-5 ${card.glow}`}>
+          <div key={card.label} className={`bg-card border border-border/60 rounded-xl p-5 shadow-sm hover:shadow-md transition-all`}>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{card.label}</span>
-              <card.icon className={`h-4 w-4 ${card.color}`} />
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${card.bg}`}>
+                <card.icon className={`h-4 w-4 ${card.color}`} />
+              </div>
             </div>
             <div className={`text-2xl font-bold ${card.color}`}>{card.value}</div>
           </div>
@@ -90,20 +91,20 @@ export default function MerchantDashboard() {
           </Link>
         </div>
         {!txs || txs.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground bg-card border border-border/40 rounded-xl">
+          <div className="text-center py-12 text-muted-foreground bg-card border border-border/60 rounded-xl">
             <div className="text-3xl mb-3">📊</div>
             <div className="font-medium">No payments yet</div>
             <div className="text-sm mt-1">Create a payment link or use the POS to start accepting payments</div>
             <div className="flex gap-3 justify-center mt-4">
               <Link href="/merchant/pos"><button className="px-4 py-2 bg-primary/10 border border-primary/30 rounded-lg text-primary text-sm font-medium">POS Terminal</button></Link>
-              <Link href="/merchant/links"><button className="px-4 py-2 bg-muted border border-border/50 rounded-lg text-sm font-medium">Payment Links</button></Link>
+              <Link href="/merchant/links"><button className="px-4 py-2 bg-muted border border-border/60 rounded-lg text-sm font-medium">Payment Links</button></Link>
             </div>
           </div>
         ) : (
-          <div className="bg-card border border-border/40 rounded-xl overflow-hidden">
+          <div className="bg-card border border-border/60 rounded-xl overflow-hidden shadow-sm">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border/40 text-xs text-muted-foreground">
+                <tr className="border-b border-border/40 text-xs text-muted-foreground bg-muted/50">
                   <th className="px-4 py-3 text-left font-medium">ID</th>
                   <th className="px-4 py-3 text-left font-medium">Description</th>
                   <th className="px-4 py-3 text-right font-medium">Amount</th>
@@ -116,7 +117,7 @@ export default function MerchantDashboard() {
                   <tr key={tx.id} className="border-b border-border/20 last:border-0 hover:bg-muted/30 transition-colors">
                     <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{tx.id.slice(0, 8).toUpperCase()}</td>
                     <td className="px-4 py-3 text-xs text-foreground max-w-[180px] truncate">{tx.description ?? "—"}</td>
-                    <td className="px-4 py-3 text-right font-semibold text-emerald-400">+{parseFloat(tx.amount).toFixed(2)} {tx.currency}</td>
+                    <td className="px-4 py-3 text-right font-semibold text-emerald-700">+{parseFloat(tx.amount).toFixed(2)} {tx.currency}</td>
                     <td className="px-4 py-3 text-center"><StatusBadge status={tx.status} /></td>
                     <td className="px-4 py-3 text-right text-xs text-muted-foreground">{timeAgo(tx.createdAt)}</td>
                   </tr>

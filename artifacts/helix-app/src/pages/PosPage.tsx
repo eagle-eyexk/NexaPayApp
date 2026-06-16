@@ -32,7 +32,6 @@ export default function PosPage() {
       if (d === "." && prev.includes(".")) return prev;
       if (prev === "0" && d !== ".") return d;
       const next = prev + d;
-      // max 2 decimal places
       const parts = next.split(".");
       if (parts[1] && parts[1].length > 2) return prev;
       return next;
@@ -71,22 +70,22 @@ export default function PosPage() {
   if (result) {
     return (
       <div className="flex items-center justify-center min-h-[70vh]">
-        <div className="bg-card border border-emerald-500/30 rounded-2xl p-10 max-w-md w-full text-center shadow-[0_0_50px_rgba(34,197,94,0.1)] space-y-5">
+        <div className="bg-card border border-emerald-500/30 rounded-2xl p-10 max-w-md w-full text-center shadow-sm space-y-5">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-emerald-500/10 border border-emerald-500/30 rounded-full">
-            <CheckCircle2 className="h-10 w-10 text-emerald-400" />
+            <CheckCircle2 className="h-10 w-10 text-emerald-700" />
           </div>
           <div>
             <h2 className="text-2xl font-bold text-foreground">Payment Accepted!</h2>
             <p className="text-muted-foreground text-sm mt-1">Transaction recorded successfully</p>
           </div>
           <div className="bg-muted rounded-xl p-5 space-y-2 text-sm">
-            <div className="flex justify-between"><span className="text-muted-foreground">Amount</span><span className="font-bold text-emerald-400 text-lg">{parseFloat(result.amount).toFixed(2)} {result.currency}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Amount</span><span className="font-bold text-emerald-700 text-lg">{parseFloat(result.amount).toFixed(2)} {result.currency}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Ref</span><span className="font-mono text-xs">{result.id.slice(0, 12).toUpperCase()}</span></div>
           </div>
           <div className="flex gap-3">
             <button
               onClick={() => window.open(`/api/user/transactions/${result.id}/receipt`, "_blank")}
-              className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-muted border border-border/50 rounded-lg text-sm font-medium hover:border-primary/40 transition-colors"
+              className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-muted border border-border/60 rounded-lg text-sm font-medium hover:border-primary/40 transition-colors"
             >
               <Download className="h-4 w-4" /> Receipt PDF
             </button>
@@ -109,10 +108,10 @@ export default function PosPage() {
         <p className="text-muted-foreground text-sm mt-0.5">Charge customers directly</p>
       </div>
 
-      <div className="bg-card border border-border/50 rounded-2xl overflow-hidden">
-        {/* Display */}
+      <div className="bg-card border border-border/60 rounded-2xl overflow-hidden shadow-sm">
+        {/* Display — kept dark to simulate a terminal screen */}
         <div className="bg-gradient-to-b from-[#0d1b3e] to-[#061528] px-6 py-8 text-center">
-          <div className="text-xs text-muted-foreground uppercase tracking-widest mb-2">Amount to Charge</div>
+          <div className="text-xs text-white/50 uppercase tracking-widest mb-2">Amount to Charge</div>
           <div className="text-5xl font-bold text-white tabular-nums">
             {parseFloat(amount).toFixed(2)}
           </div>
@@ -122,7 +121,7 @@ export default function PosPage() {
         {/* Currency selector */}
         <div className="border-b border-border/40 px-4 py-3 flex gap-2 overflow-x-auto">
           {CURRENCIES.map((c) => (
-            <button key={c} onClick={() => setCurrency(c)} className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${currency === c ? "bg-primary/20 text-primary border border-primary/40" : "bg-muted text-muted-foreground"}`}>{c}</button>
+            <button key={c} onClick={() => setCurrency(c)} className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${currency === c ? "bg-primary/15 text-primary border border-primary/40" : "bg-muted text-muted-foreground"}`}>{c}</button>
           ))}
         </div>
 
@@ -133,7 +132,7 @@ export default function PosPage() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Item / Description *"
-            className="w-full bg-muted border border-border/40 rounded-lg px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+            className="w-full bg-muted border border-border/40 rounded-lg px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
           />
         </div>
         <div className="px-4 py-3 border-b border-border/40">
@@ -142,33 +141,32 @@ export default function PosPage() {
             value={customerEmail}
             onChange={(e) => setCustomerEmail(e.target.value)}
             placeholder="Customer email (optional)"
-            className="w-full bg-muted border border-border/40 rounded-lg px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+            className="w-full bg-muted border border-border/40 rounded-lg px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
           />
         </div>
 
         {/* Numpad */}
         <div className="p-4 grid grid-cols-3 gap-2">
           {["1","2","3","4","5","6","7","8","9",".","0"].map((d) => (
-            <button key={d} onClick={() => pressDigit(d)} className="h-14 rounded-xl bg-muted hover:bg-muted/80 active:scale-95 text-lg font-semibold text-foreground transition-all">
+            <button key={d} onClick={() => pressDigit(d)} className="h-14 rounded-xl bg-muted hover:bg-muted/70 active:scale-95 text-lg font-semibold text-foreground transition-all border border-border/30">
               {d}
             </button>
           ))}
-          <button onClick={clearLast} className="h-14 rounded-xl bg-muted hover:bg-muted/80 active:scale-95 text-foreground transition-all flex items-center justify-center">
+          <button onClick={clearLast} className="h-14 rounded-xl bg-muted hover:bg-muted/70 active:scale-95 text-foreground transition-all flex items-center justify-center border border-border/30">
             <Delete className="h-5 w-5" />
           </button>
         </div>
 
-        {error && <div className="mx-4 mb-3 bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-2.5 text-sm text-red-400">{error}</div>}
+        {error && <div className="mx-4 mb-3 bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-2.5 text-sm text-red-600">{error}</div>}
 
-        {/* Charge button */}
         <div className="p-4 pt-0 flex gap-3">
-          <button onClick={clearAll} className="p-3 rounded-xl bg-muted border border-border/40 hover:border-border transition-colors">
+          <button onClick={clearAll} className="p-3 rounded-xl bg-muted border border-border/60 hover:border-border transition-colors">
             <X className="h-5 w-5 text-muted-foreground" />
           </button>
           <button
             onClick={handleCharge}
             disabled={charge.isPending}
-            className="flex-1 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg rounded-xl transition-all shadow-[0_0_20px_rgba(0,255,255,0.3)] disabled:opacity-60"
+            className="flex-1 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg rounded-xl transition-all shadow-sm disabled:opacity-60"
           >
             {charge.isPending ? "Processing…" : `Charge ${parseFloat(amount).toFixed(2)} ${currency}`}
           </button>

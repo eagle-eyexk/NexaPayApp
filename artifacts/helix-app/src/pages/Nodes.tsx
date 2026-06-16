@@ -12,7 +12,7 @@ export default function Nodes() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Global Node Network</h2>
-          <p className="text-muted-foreground">Real-time status of Helix Protocol routing and validator nodes.</p>
+          <p className="text-muted-foreground">Real-time status of Nexa routing and validator nodes.</p>
         </div>
       </div>
 

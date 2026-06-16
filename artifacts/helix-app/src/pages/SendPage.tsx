@@ -47,15 +47,15 @@ export default function SendPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-4 max-w-sm">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-emerald-500/10 border border-emerald-500/30 rounded-full shadow-[0_0_30px_rgba(34,197,94,0.2)]">
-            <CheckCircle2 className="h-10 w-10 text-emerald-400" />
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-emerald-500/10 border border-emerald-500/30 rounded-full shadow-sm">
+            <CheckCircle2 className="h-10 w-10 text-emerald-700" />
           </div>
           <h2 className="text-2xl font-bold text-foreground">Sent!</h2>
           <p className="text-muted-foreground">
-            <span className="text-emerald-400 font-semibold">{amount} {currency}</span> sent successfully.
+            <span className="text-emerald-700 font-semibold">{amount} {currency}</span> sent successfully.
           </p>
           <div className="flex gap-3 justify-center">
-            <button onClick={() => { setSuccess(false); setAmount(""); setRecipientAddress(""); setDescription(""); }} className="px-5 py-2.5 rounded-lg bg-muted text-sm font-medium hover:bg-muted/80 transition-colors">Send Another</button>
+            <button onClick={() => { setSuccess(false); setAmount(""); setRecipientAddress(""); setDescription(""); }} className="px-5 py-2.5 rounded-lg bg-muted text-sm font-medium hover:bg-muted/80 transition-colors border border-border/60">Send Another</button>
             <button onClick={() => setLocation("/dashboard")} className="px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors">Dashboard</button>
           </div>
         </div>
@@ -74,8 +74,7 @@ export default function SendPage() {
         <p className="text-muted-foreground text-sm mt-1">Transfer crypto to any wallet address</p>
       </div>
 
-      <div className="bg-card border border-border/50 rounded-2xl p-6 space-y-5">
-        {/* Currency selector */}
+      <div className="bg-card border border-border/60 rounded-2xl p-6 space-y-5 shadow-sm">
         <div>
           <label className="block text-xs font-medium text-muted-foreground mb-2">Currency</label>
           <div className="flex flex-wrap gap-2">
@@ -84,7 +83,7 @@ export default function SendPage() {
                 key={w.currency}
                 type="button"
                 onClick={() => setCurrency(w.currency)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${currency === w.currency ? "bg-primary/20 text-primary border border-primary/40" : "bg-muted text-muted-foreground border border-transparent hover:border-border"}`}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${currency === w.currency ? "bg-primary/15 text-primary border border-primary/40" : "bg-muted text-muted-foreground border border-transparent hover:border-border"}`}
               >
                 {w.currency}
               </button>
@@ -104,7 +103,7 @@ export default function SendPage() {
               onChange={(e) => setRecipientAddress(e.target.value)}
               placeholder="0x... or wallet address"
               required
-              className="w-full bg-muted border border-border/50 rounded-lg px-4 py-3 text-sm font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+              className="w-full bg-muted border border-border/60 rounded-lg px-4 py-3 text-sm font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
             />
           </div>
 
@@ -119,13 +118,13 @@ export default function SendPage() {
                 step="any"
                 min="0"
                 required
-                className={`w-full bg-muted border rounded-lg px-4 py-3 pr-16 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all ${insufficient ? "border-red-500/50 focus:ring-red-500/30" : "border-border/50"}`}
+                className={`w-full bg-muted border rounded-lg px-4 py-3 pr-16 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all ${insufficient ? "border-red-500/50 focus:ring-red-500/30" : "border-border/60"}`}
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium">{currency}</span>
             </div>
             {amount && (
               <div className="mt-1 flex justify-between text-xs">
-                <span className={insufficient ? "text-red-400" : "text-muted-foreground"}>
+                <span className={insufficient ? "text-red-600" : "text-muted-foreground"}>
                   {insufficient ? "⚠ Insufficient balance" : "✓ Amount valid"}
                 </span>
                 <button type="button" onClick={() => setAmount(balance.toFixed(8))} className="text-primary hover:text-primary/80 transition-colors">Max</button>
@@ -140,16 +139,16 @@ export default function SendPage() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Payment for services..."
-              className="w-full bg-muted border border-border/50 rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+              className="w-full bg-muted border border-border/60 rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
             />
           </div>
 
-          {error && <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 text-sm text-red-400">{error}</div>}
+          {error && <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 text-sm text-red-600">{error}</div>}
 
           <button
             type="submit"
             disabled={sendFunds.isPending || insufficient || !amount || !recipientAddress}
-            className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 rounded-lg transition-all shadow-[0_0_20px_rgba(0,255,255,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send className="h-4 w-4" />
             {sendFunds.isPending ? "Sending…" : `Send ${amount || "0"} ${currency}`}

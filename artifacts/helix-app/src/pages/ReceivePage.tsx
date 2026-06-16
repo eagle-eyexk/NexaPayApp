@@ -38,21 +38,19 @@ export default function ReceivePage() {
         <p className="text-muted-foreground text-sm mt-1">Share your QR code or address to receive funds</p>
       </div>
 
-      {/* Currency tabs */}
       <div className="flex flex-wrap gap-2">
         {CURRENCIES.map((c) => (
           <button
             key={c}
             onClick={() => setCurrency(c)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${currency === c ? "bg-primary/20 text-primary border border-primary/40" : "bg-muted text-muted-foreground border border-transparent hover:border-border"}`}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${currency === c ? "bg-primary/15 text-primary border border-primary/40" : "bg-muted text-muted-foreground border border-transparent hover:border-border"}`}
           >
             {c}
           </button>
         ))}
       </div>
 
-      <div className="bg-card border border-border/50 rounded-2xl p-8 space-y-6">
-        {/* TAP TO PAY badge */}
+      <div className="bg-card border border-border/60 rounded-2xl p-8 space-y-6 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full">
             <QrCode className="h-4 w-4 text-primary" />
@@ -63,9 +61,8 @@ export default function ReceivePage() {
           </div>
         </div>
 
-        {/* QR code */}
         <div className="flex justify-center">
-          <div className="p-5 bg-white rounded-2xl shadow-[0_0_40px_rgba(0,255,255,0.15)] border border-primary/20">
+          <div className="p-5 bg-white rounded-2xl shadow-md border border-border/40">
             {info?.qrData ? (
               <QRCode value={info.qrData} size={200} level="M" fgColor="#0f172a" bgColor="#ffffff" />
             ) : (
@@ -74,7 +71,6 @@ export default function ReceivePage() {
           </div>
         </div>
 
-        {/* Address */}
         <div>
           <div className="text-xs font-medium text-muted-foreground mb-2">Your {currency} Address</div>
           <div className="flex items-center gap-2">
@@ -83,7 +79,7 @@ export default function ReceivePage() {
             </div>
             <button
               onClick={copyAddress}
-              className={`shrink-0 p-3 rounded-lg border transition-all ${copied ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "bg-muted border-border/50 text-muted-foreground hover:border-primary/40 hover:text-primary"}`}
+              className={`shrink-0 p-3 rounded-lg border transition-all ${copied ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-700" : "bg-muted border-border/60 text-muted-foreground hover:border-primary/40 hover:text-primary"}`}
             >
               {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
             </button>

@@ -32,7 +32,6 @@ export default function RevenuePage() {
   }, [user, isLoading]);
 
   const txs = (allTxs ?? []).filter((t) => filterCurrency === "All" || t.currency === filterCurrency);
-
   const totalFiltered = txs.reduce((s, t) => s + parseFloat(t.amount), 0);
 
   function downloadCSV() {
@@ -44,7 +43,7 @@ export default function RevenuePage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `helix-revenue-${Date.now()}.csv`;
+    a.download = `nexa-revenue-${Date.now()}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -58,31 +57,31 @@ export default function RevenuePage() {
         </div>
         <button
           onClick={downloadCSV}
-          className="flex items-center gap-1.5 px-4 py-2 bg-muted border border-border/50 rounded-lg text-sm font-medium hover:border-primary/40 hover:text-primary transition-all"
+          className="flex items-center gap-1.5 px-4 py-2 bg-muted border border-border/60 rounded-lg text-sm font-medium hover:border-primary/40 hover:text-primary transition-all"
         >
           <Download className="h-4 w-4" /> Export CSV
         </button>
       </div>
 
-      {/* Summary cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Total Revenue", value: `$${parseFloat(stats?.totalRevenue ?? "0").toLocaleString()}`, icon: DollarSign, color: "text-cyan-400" },
-          { label: "Transactions", value: (stats?.totalTransactions ?? 0).toString(), icon: TrendingUp, color: "text-blue-400" },
-          { label: "This Month", value: `$${parseFloat(stats?.monthRevenue ?? "0").toFixed(2)}`, icon: DollarSign, color: "text-emerald-400" },
-          { label: "Today", value: `$${parseFloat(stats?.todayRevenue ?? "0").toFixed(2)}`, icon: TrendingUp, color: "text-purple-400" },
+          { label: "Total Revenue", value: `$${parseFloat(stats?.totalRevenue ?? "0").toLocaleString()}`, icon: DollarSign, color: "text-cyan-700", bg: "bg-cyan-50" },
+          { label: "Transactions", value: (stats?.totalTransactions ?? 0).toString(), icon: TrendingUp, color: "text-blue-600", bg: "bg-blue-50" },
+          { label: "This Month", value: `$${parseFloat(stats?.monthRevenue ?? "0").toFixed(2)}`, icon: DollarSign, color: "text-emerald-700", bg: "bg-emerald-50" },
+          { label: "Today", value: `$${parseFloat(stats?.todayRevenue ?? "0").toFixed(2)}`, icon: TrendingUp, color: "text-purple-700", bg: "bg-purple-50" },
         ].map((c) => (
-          <div key={c.label} className="bg-card border border-border/40 rounded-xl p-4">
+          <div key={c.label} className="bg-card border border-border/60 rounded-xl p-4 shadow-sm">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs text-muted-foreground uppercase tracking-wider">{c.label}</span>
-              <c.icon className={`h-4 w-4 ${c.color}`} />
+              <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${c.bg}`}>
+                <c.icon className={`h-3.5 w-3.5 ${c.color}`} />
+              </div>
             </div>
             <div className={`text-xl font-bold ${c.color}`}>{c.value}</div>
           </div>
         ))}
       </div>
 
-      {/* Filters */}
       <div className="flex items-center gap-3 flex-wrap">
         <Filter className="h-4 w-4 text-muted-foreground" />
         <span className="text-sm text-muted-foreground">Filter by currency:</span>
@@ -91,19 +90,18 @@ export default function RevenuePage() {
             <button
               key={c}
               onClick={() => setFilterCurrency(c)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${filterCurrency === c ? "bg-primary/20 text-primary border border-primary/40" : "bg-muted text-muted-foreground border border-transparent hover:border-border"}`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${filterCurrency === c ? "bg-primary/15 text-primary border border-primary/40" : "bg-muted text-muted-foreground border border-transparent hover:border-border"}`}
             >
               {c}
             </button>
           ))}
         </div>
         {filterCurrency !== "All" && (
-          <span className="text-xs text-muted-foreground ml-2">Filtered total: <strong className="text-emerald-400">{totalFiltered.toFixed(4)} {filterCurrency}</strong></span>
+          <span className="text-xs text-muted-foreground ml-2">Filtered total: <strong className="text-emerald-700">{totalFiltered.toFixed(4)} {filterCurrency}</strong></span>
         )}
       </div>
 
-      {/* Table */}
-      <div className="bg-card border border-border/40 rounded-xl overflow-hidden">
+      <div className="bg-card border border-border/60 rounded-xl overflow-hidden shadow-sm">
         {!txs || txs.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <div className="text-3xl mb-3">📈</div>
@@ -113,7 +111,7 @@ export default function RevenuePage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border/40 text-xs text-muted-foreground">
+                <tr className="border-b border-border/40 text-xs text-muted-foreground bg-muted/50">
                   <th className="px-4 py-3 text-left font-medium">ID</th>
                   <th className="px-4 py-3 text-left font-medium">Date</th>
                   <th className="px-4 py-3 text-left font-medium">Description</th>
@@ -130,9 +128,9 @@ export default function RevenuePage() {
                     <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{timeAgo(tx.createdAt)}</td>
                     <td className="px-4 py-3 text-xs max-w-[180px] truncate text-foreground">{tx.description ?? "—"}</td>
                     <td className="px-4 py-3 text-xs text-muted-foreground capitalize">{tx.type.replace(/_/g, " ")}</td>
-                    <td className="px-4 py-3 text-right font-semibold text-emerald-400">+{parseFloat(tx.amount).toFixed(4)} {tx.currency}</td>
+                    <td className="px-4 py-3 text-right font-semibold text-emerald-700">+{parseFloat(tx.amount).toFixed(4)} {tx.currency}</td>
                     <td className="px-4 py-3 text-center">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border ${tx.status === "completed" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-muted text-muted-foreground border-border/40"}`}>{tx.status}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border ${tx.status === "completed" ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/20" : "bg-muted text-muted-foreground border-border/40"}`}>{tx.status}</span>
                     </td>
                     <td className="px-4 py-3 text-center">
                       <button onClick={() => window.open(`/api/user/transactions/${tx.id}/receipt`, "_blank")} className="text-xs text-primary hover:text-primary/80 transition-colors underline">PDF</button>
